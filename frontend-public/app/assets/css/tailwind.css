@@ -1,0 +1,71 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  body {
+    @apply bg-brand-background text-brand-text font-sans antialiased;
+  }
+}
+
+/* ═══════════════════════════════════════════════
+   SCROLL ANIMATIONS — data-ao attribute system
+   Foydalanish: <div data-ao="fade-up" data-ao-delay="100">
+   ═══════════════════════════════════════════════ */
+
+/* Boshlang'ich holat — ko'rinmagan */
+[data-ao] {
+  opacity: 0;
+  transition-timing-function: cubic-bezier(0.25, 0.46, 0.45, 0.94);
+  transition-property: opacity, transform;
+  will-change: opacity, transform;
+}
+
+/* Delay qo'llab-quvvatlash */
+[data-ao-delay="50"]  { transition-delay: 50ms; }
+[data-ao-delay="100"] { transition-delay: 100ms; }
+[data-ao-delay="150"] { transition-delay: 150ms; }
+[data-ao-delay="200"] { transition-delay: 200ms; }
+[data-ao-delay="250"] { transition-delay: 250ms; }
+[data-ao-delay="300"] { transition-delay: 300ms; }
+[data-ao-delay="400"] { transition-delay: 400ms; }
+[data-ao-delay="500"] { transition-delay: 500ms; }
+[data-ao-delay="600"] { transition-delay: 600ms; }
+
+/* Duration qo'llab-quvvatlash */
+[data-ao-duration="400"]  { transition-duration: 400ms; }
+[data-ao-duration="500"]  { transition-duration: 500ms; }
+[data-ao-duration="600"]  { transition-duration: 600ms; }
+[data-ao-duration="700"]  { transition-duration: 700ms; }
+[data-ao-duration="800"]  { transition-duration: 800ms; }
+[data-ao-duration="900"]  { transition-duration: 900ms; }
+[data-ao-duration="1000"] { transition-duration: 1000ms; }
+
+/* Default duration */
+[data-ao]:not([data-ao-duration]) { transition-duration: 700ms; }
+
+/* ── Animatsiya turlari (boshlang'ich holatlar) ── */
+[data-ao="fade-up"]    { transform: translateY(40px); }
+[data-ao="fade-down"]  { transform: translateY(-40px); }
+[data-ao="fade-left"]  { transform: translateX(40px); }
+[data-ao="fade-right"] { transform: translateX(-40px); }
+[data-ao="fade"]       { transform: none; }
+[data-ao="zoom-in"]    { transform: scale(0.85); }
+[data-ao="zoom-out"]   { transform: scale(1.15); }
+[data-ao="flip-up"]    { transform: perspective(600px) rotateX(15deg) translateY(30px); }
+
+/* ── Ko'ringanda: ao-visible klassi qo'shiladi ── */
+[data-ao].ao-visible {
+  opacity: 1;
+  transform: none;
+}
+
+/* Motion qisqartirish imkoniyati (accessibility) */
+@media (prefers-reduced-motion: reduce) {
+  [data-ao] {
+    transition: none !important;
+    opacity: 1 !important;
+    transform: none !important;
+  }
+}
+

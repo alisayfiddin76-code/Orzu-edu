@@ -1,0 +1,28 @@
+{
+  "name": "orzu-edu-frontend-public",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "build": "nuxt build",
+    "dev": "nuxt dev --host 0.0.0.0",
+    "generate": "nuxt generate",
+    "preview": "nuxt preview",
+    "postinstall": "nuxt prepare"
+  },
+  "dependencies": {
+    "pinia": "^2.1.7",
+    "vue": "^3.4.27",
+    "vue-router": "^4.3.2"
+  },
+  "devDependencies": {
+    "@iconify-json/fa6-brands": "^1.2.6",
+    "@iconify-json/ph": "^1.2.2",
+    "@nuxt/icon": "^1.5.0",
+    "@nuxtjs/tailwindcss": "^6.12.0",
+    "@pinia/nuxt": "^0.5.1",
+    "autoprefixer": "^10.4.19",
+    "nuxt": "^3.12.2",
+    "postcss": "^8.4.38",
+    "tailwindcss": "^3.4.3"
+  }
+}

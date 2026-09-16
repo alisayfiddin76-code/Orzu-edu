@@ -1,0 +1,119 @@
+@baseUrl = http://localhost:5001/api/v1
+@authToken = eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjZhMzdiYzdmMjJiN2NiODkwYjc1MmI0OCIsImlhdCI6MTc4MjAzNzY0NCwiZXhwIjoxNzgyNjQyNDQ0fQ.YyluOvWACtp3fJFoBD2mE0P0LWKMZUUTHKMU1pWDB1I
+
+### 1. Register a new SUPER_ADMIN user
+POST {{baseUrl}}/auth/register
+Content-Type: application/json
+
+{
+  "firstname": "Orzu",
+  "lastname": "Admin",
+  "phone": "+998901234567",
+  "email": "admin@orzuradu.uz",
+  "password": "Super_Secure_Password_2026",
+  "role": "SUPER_ADMIN"
+}
+
+### 2. Login to CRM (Admin, Manager, Teacher, Finance)
+POST {{baseUrl}}/auth/login
+Content-Type: application/json
+
+{
+  "phone": "+998901234567",
+  "password": "Super_Secure_Password_2026",
+  "app_type": "CRM"
+}
+
+### 3. Login to Public Portal (Should FAIL for SUPER_ADMIN role)
+POST {{baseUrl}}/auth/login
+Content-Type: application/json
+
+{
+  "phone": "+998901234567",
+  "password": "Super_Secure_Password_2026",
+  "app_type": "PUBLIC"
+}
+
+### 4. Create a new Course (Only SUPER_ADMIN)
+POST {{baseUrl}}/courses
+Content-Type: application/json
+Authorization: Bearer {{authToken}}
+
+{
+  "title": "IT Dasturlash Asoslari",
+  "description": "Noldan boshlab professional darajagacha bo'lgan frontend va backend dasturlash kursi.",
+  "duration": "6 oy",
+  "price": 800000,
+  "status": "ACTIVE"
+}
+
+### 5. Get All Active Courses (Public)
+GET {{baseUrl}}/courses
+Content-Type: application/json
+
+### 6. Get Course Teachers (Public)
+# Replace with a valid course ID from step 5 response
+@courseId = 6a37bc7f22b7cb890b752b48
+GET {{baseUrl}}/courses/{{courseId}}/teachers
+Content-Type: application/json
+
+### 7. Create a new Teacher (Only SUPER_ADMIN)
+POST {{baseUrl}}/teachers
+Content-Type: application/json
+Authorization: Bearer {{authToken}}
+
+{
+  "firstname": "Akmal",
+  "lastname": "Toshpo'latov",
+  "phone": "+998909876543",
+  "email": "akmal.t@orzuedu.uz",
+  "password": "teacherpassword123",
+  "education": "TATU, Dasturiy injiniring bakalavri",
+  "bio": "5 yillik tajribaga ega Full-stack Node.js dasturchi va o'qituvchi.",
+  "status": "ACTIVE"
+}
+
+### 8. Get All Teachers (SUPER_ADMIN, MANAGER)
+GET {{baseUrl}}/teachers
+Content-Type: application/json
+Authorization: Bearer {{authToken}}
+
+### 9. Get Single Teacher by ID (SUPER_ADMIN, MANAGER)
+# Replace with a valid teacher ID from step 8 response
+@teacherId = 667f53f938ee7a3048995a99
+GET {{baseUrl}}/teachers/{{teacherId}}
+Content-Type: application/json
+Authorization: Bearer {{authToken}}
+
+### 10. Update Teacher (SUPER_ADMIN, MANAGER)
+PATCH {{baseUrl}}/teachers/{{teacherId}}
+Content-Type: application/json
+Authorization: Bearer {{authToken}}
+
+{
+  "firstname": "Akmalbek",
+  "education": "TATU, Magistr darajasi"
+}
+
+### 11. Update Teacher Status (SUPER_ADMIN, MANAGER)
+PATCH {{baseUrl}}/teachers/{{teacherId}}/status
+Content-Type: application/json
+Authorization: Bearer {{authToken}}
+
+{
+  "status": "INACTIVE"
+}
+
+### 12. Change Teacher Password (Only SUPER_ADMIN)
+PATCH {{baseUrl}}/teachers/{{teacherId}}/password
+Content-Type: application/json
+Authorization: Bearer {{authToken}}
+
+{
+  "password": "newsecurepassword123"
+}
+
+### 13. Delete Teacher (Only SUPER_ADMIN)
+DELETE {{baseUrl}}/teachers/{{teacherId}}
+Authorization: Bearer {{authToken}}
+

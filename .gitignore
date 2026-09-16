@@ -1,0 +1,28 @@
+# Dependencies
+node_modules/
+
+# Nuxt build output
+.nuxt/
+.output/
+dist/
+
+# Environment variables (MUHIM — production secretlar GitHub'ga tushmaydi!)
+.env
+
+# Log files
+*.log
+
+# Uploads (local fayllar)
+uploads/
+
+# OS files
+.DS_Store
+Thumbs.db
+
+# IDE
+.vscode/
+.idea/
+
+# Misc
+*.swp
+*.swo
