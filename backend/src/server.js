@@ -152,11 +152,11 @@ app.all('*', (req, res, next) => {
 app.use(globalErrorHandler);
 
 // Port configuration
-const PORT = process.env.PORT || 5002;
+const PORT = process.env.PORT || 10000;
 
 // Start Server
 const server = app.listen(PORT, '0.0.0.0', () => {
-  console.log(`Server is running in ${process.env.NODE_ENV || 'development'} mode on port ${PORT}`);
+  console.log(`Backend server running on port ${PORT}`);
 
   // ---- Monthly Invoice Cron Job ----
   // Har oyning 1-kuni soat 00:05 da barcha faol o'quvchilarga to'liq oylik invoice yaratiladi
