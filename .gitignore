@@ -9,6 +9,9 @@ dist/
 # Environment variables (MUHIM — production secretlar GitHub'ga tushmaydi!)
 .env
 
+# Lock files (katta, Render o'zi yaratadi)
+package-lock.json
+
 # Log files
 *.log
 
