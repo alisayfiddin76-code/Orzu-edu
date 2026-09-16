@@ -7,23 +7,26 @@ const AppError = require('../utils/appError');
  */
 exports.getContactSettings = async (req, res, next) => {
   try {
-    let settings = await ContactSettings.findOne();
+    const settings = await ContactSettings.findOne();
 
-    // Agar bazada hech nima bo'lmasa, default qiymatlar bilan yaratib qaytaramiz
+    // Agar bazada hech nima bo'lmasa, null qaytaramiz
     if (!settings) {
-      settings = await ContactSettings.create({
-        phone_1: '+998 71 123 45 67',
-        email: 'info@orzuedu.uz',
-        main_address: "Toshkent sh., Chilonzor tumani, Bunyodkor ko'chasi, 42-uy",
+      return res.status(200).json({
+        status: 'success',
+        data: null
       });
     }
 
-    res.status(200).json({
+    return res.status(200).json({
       status: 'success',
       data: { settings },
     });
   } catch (error) {
-    next(error);
+    console.error("Contact fetch error:", error);
+    return res.status(500).json({
+      status: 'error',
+      message: error.message
+    });
   }
 };
 
