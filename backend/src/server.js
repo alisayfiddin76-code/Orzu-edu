@@ -19,7 +19,15 @@ connectDB();
 // ---- CORS — faqat ruxsat etilgan domenlar ----
 const allowedOrigins = process.env.ALLOWED_ORIGINS
   ? process.env.ALLOWED_ORIGINS.split(',')
-  : ['http://localhost:3000', 'http://localhost:3001', 'http://localhost:3002', 'http://localhost:3003', 'http://localhost:3004'];
+  : [
+      'https://orzu-edu-frontend.onrender.com',
+      'https://orzu-edu-5iv7.onrender.com',
+      'http://localhost:3000', 
+      'http://localhost:3001', 
+      'http://localhost:3002', 
+      'http://localhost:3003', 
+      'http://localhost:3004'
+    ];
 
 app.use(cors({
   origin: function (origin, callback) {
