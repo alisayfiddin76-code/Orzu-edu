@@ -61,8 +61,8 @@ export default defineNuxtConfig({
   },
 
   routeRules: {
-    '/api/**': { proxy: `${process.env.API_PROXY_TARGET || 'http://127.0.0.1:5001'}/api/**` },
-    '/uploads/**': { proxy: `${process.env.API_PROXY_TARGET || 'http://127.0.0.1:5001'}/uploads/**` },
+    '/api/**': { proxy: `${process.env.API_PROXY_TARGET || 'https://orzu-edu.onrender.com'}/api/**` },
+    '/uploads/**': { proxy: `${process.env.API_PROXY_TARGET || 'https://orzu-edu.onrender.com'}/uploads/**` },
   },
 
   icon: {
