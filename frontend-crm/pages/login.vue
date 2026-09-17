@@ -168,6 +168,7 @@ const handleLogin = async () => {
 
   try {
     const data: any = await $fetch("/api/v1/auth/login", {
+      baseURL: 'https://orzu-edu.onrender.com',
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: loginBody
