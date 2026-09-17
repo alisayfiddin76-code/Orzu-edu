@@ -345,7 +345,9 @@ const contactSettings = ref<any>({
 
 const fetchContactSettings = async () => {
   try {
-    const res: any = await $fetch('/api/v1/settings/contact')
+    const config = useRuntimeConfig();
+    const baseURL = config.public.apiUrl || 'https://orzu-edu.onrender.com';
+    const res: any = await $fetch('/api/v1/settings/contact', { baseURL })
     if (res?.data?.settings) {
       contactSettings.value = res.data.settings
     }

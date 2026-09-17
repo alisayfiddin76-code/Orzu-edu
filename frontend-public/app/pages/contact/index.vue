@@ -220,8 +220,12 @@ const loadingSettings = ref(true)
 
 const fetchContactSettings = async () => {
   try {
-    const res: any = await $fetch('/api/v1/settings/contact')
-    contactSettings.value = res.data.settings
+    const config = useRuntimeConfig();
+    const baseURL = config.public.apiUrl || 'https://orzu-edu.onrender.com';
+    const res: any = await $fetch('/api/v1/settings/contact', { baseURL })
+    if (res?.data?.settings) {
+      contactSettings.value = res.data.settings
+    }
   } catch (e) {
     // fallback values if API fails
     contactSettings.value = {
