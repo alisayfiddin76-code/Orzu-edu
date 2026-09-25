@@ -31,8 +31,8 @@ const allowedOrigins = process.env.ALLOWED_ORIGINS
 
 app.use(cors({
   origin: function (origin, callback) {
-    // Development rejimida hamma originlarga ruxsat beramiz (mobil Wi-Fi orqali test qilish uchun)
-    if (process.env.NODE_ENV === 'development') {
+    // Development rejimida yoki Vercel'dan kelgan so'rovlarga avtomatik ruxsat beramiz
+    if (process.env.NODE_ENV === 'development' || (origin && origin.includes('vercel.app'))) {
       return callback(null, true);
     }
     
