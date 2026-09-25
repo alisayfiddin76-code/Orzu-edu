@@ -362,7 +362,6 @@ interface Teacher {
   email?: string
   education?: string
   bio?: string
-  bio?: string
   subject?: string
   scoreType?: string
   score?: string
