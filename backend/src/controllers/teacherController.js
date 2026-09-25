@@ -22,10 +22,10 @@ exports.createTeacher = async (req, res, next) => {
     }
 
     // Handle file upload
+    // Hozircha rasm yuklanmaydi (Cloudinary keyinchalik ulanadi)
+    // Memory storage ishlatilgani uchun req.file.filename mavjud emas
     let avatarPath = null;
-    if (req.file) {
-      avatarPath = `/uploads/teachers/${req.file.filename}`;
-    }
+    // TODO: Cloudinary integratsiya qilingandan so'ng shu yerda rasm yuklanadi
 
     // Create User
     const teacher = await User.create({
@@ -128,9 +128,8 @@ exports.updateTeacher = async (req, res, next) => {
 
     const updateData = { firstname, lastname, phone, email, education, bio, subject, scoreType, score, experience, studentsCount, telegram };
 
-    if (req.file) {
-      updateData.avatar = `/uploads/teachers/${req.file.filename}`;
-    }
+    // Hozircha rasm yuklanmaydi (Cloudinary keyinchalik ulanadi)
+    // if (req.file) { updateData.avatar = ... }
 
     const teacher = await User.findOneAndUpdate(
       { _id: id, role: "TEACHER" },

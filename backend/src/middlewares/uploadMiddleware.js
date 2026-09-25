@@ -1,40 +1,17 @@
 const multer = require('multer');
-const path = require('path');
-const fs = require('fs');
 
 /**
- * Upload Middleware — Multer bilan lokal disk storage
- * Rasm fayllari backend/uploads/<category>/ papkasiga saqlanadi
- * URL: /uploads/<category>/filename.ext
+ * Upload Middleware — Multer bilan Memory Storage
+ * Render.com va boshqa cloud hosting larda disk read-only bo'lgani uchun
+ * fayllar xotiraga (buffer) saqlanadi.
+ * Keyinchalik Cloudinary yoki boshqa cloud storage ga yuklash mumkin.
+ * req.file.buffer — fayl ma'lumotlari
+ * req.file.mimetype — fayl turi
+ * req.file.originalname — fayl nomi
  */
 
-// Papkani avtomatik yaratish
-const ensureDir = (dir) => {
-  if (!fs.existsSync(dir)) {
-    fs.mkdirSync(dir, { recursive: true });
-  }
-};
-
-// Storage konfiguratsiyasi
-const storage = multer.diskStorage({
-  destination: (req, file, cb) => {
-    // Route parametridan yoki default 'misc' papkasini aniqlash
-    const category = req.uploadCategory || 'misc';
-    const uploadPath = path.join(__dirname, '../../uploads', category);
-    ensureDir(uploadPath);
-    cb(null, uploadPath);
-  },
-  filename: (req, file, cb) => {
-    // Fayl nomi: timestamp-originalname (bo'shliqlar o'rniga chiziq)
-    const uniqueSuffix = Date.now() + '-' + Math.round(Math.random() * 1e9);
-    const ext = path.extname(file.originalname);
-    const baseName = path.basename(file.originalname, ext)
-      .replace(/\s+/g, '-')
-      .toLowerCase()
-      .slice(0, 40);
-    cb(null, `${uniqueSuffix}-${baseName}${ext}`);
-  },
-});
+// Memory storage — disk o'rniga RAM da saqlaydi
+const storage = multer.memoryStorage();
 
 // Faqat rasm fayllari ruxsati
 const fileFilter = (req, file, cb) => {
