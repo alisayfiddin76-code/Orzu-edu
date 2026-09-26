@@ -78,6 +78,15 @@ module.exports = (err, req, res, next) => {
   err.statusCode = err.statusCode || 500;
   err.status = err.status || 'error';
 
+  // Har doim to'liq xatoni logga chiqar (Render.com loglarida ko'rinsin)
+  console.error('=== GLOBAL ERROR HANDLER ===');
+  console.error('URL:', req.method, req.originalUrl);
+  console.error('Status:', err.statusCode);
+  console.error('Message:', err.message);
+  console.error('Name:', err.name);
+  console.error('Stack:', err.stack);
+  console.error('============================');
+
   if (process.env.NODE_ENV === 'development' || !process.env.NODE_ENV) {
     sendErrorDev(err, res);
   } else {
