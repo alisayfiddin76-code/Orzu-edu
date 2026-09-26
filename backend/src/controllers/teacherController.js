@@ -9,25 +9,22 @@ const AppError = require("../utils/appError");
  */
 exports.createTeacher = async (req, res, next) => {
   try {
+    console.log('[DEBUG] createTeacher called');
+    console.log('[DEBUG] body:', JSON.stringify(req.body));
+    
     const { firstname, lastname, phone, email, password, education, bio, status, subject, scoreType, score, experience, studentsCount, telegram } = req.body;
 
     if (!firstname || !lastname || !phone || !password) {
       return next(new AppError("Iltimos, firstname, lastname, phone, password ni to'ldiring", 400));
     }
 
-    // Check if user already exists
+    console.log('[DEBUG] Checking if user exists...');
     const userExists = await User.findOne({ phone });
     if (userExists) {
       return next(new AppError("Bu telefon raqami bilan foydalanuvchi allaqachon mavjud", 400));
     }
 
-    // Handle file upload
-    // Hozircha rasm yuklanmaydi (Cloudinary keyinchalik ulanadi)
-    // Memory storage ishlatilgani uchun req.file.filename mavjud emas
-    let avatarPath = null;
-    // TODO: Cloudinary integratsiya qilingandan so'ng shu yerda rasm yuklanadi
-
-    // Create User
+    console.log('[DEBUG] Creating user...');
     const teacher = await User.create({
       firstname,
       lastname,
@@ -44,19 +41,18 @@ exports.createTeacher = async (req, res, next) => {
       experience: experience || null,
       studentsCount: studentsCount || null,
       telegram: telegram || null,
-      avatar: avatarPath
+      avatar: null
     });
 
-    // Remove password from response
+    console.log('[DEBUG] User created successfully:', teacher._id);
     teacher.password = undefined;
 
     res.status(201).json({
       status: "success",
-      data: {
-        teacher,
-      },
+      data: { teacher },
     });
   } catch (error) {
+    console.error('[DEBUG] createTeacher ERROR:', error.name, error.message, error.stack);
     next(error);
   }
 };
