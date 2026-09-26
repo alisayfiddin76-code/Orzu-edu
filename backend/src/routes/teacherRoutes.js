@@ -13,8 +13,6 @@ router.post(
   "/",
   authMiddleware.protect,
   authMiddleware.restrictTo("SUPER_ADMIN"),
-  setCategory("teachers"),
-  upload.single("avatar"),
   teacherController.createTeacher
 );
 
@@ -39,8 +37,6 @@ router.patch(
   "/:id",
   authMiddleware.protect,
   authMiddleware.restrictTo("SUPER_ADMIN", "MANAGER"),
-  setCategory("teachers"),
-  upload.single("avatar"),
   teacherController.updateTeacher
 );
 
