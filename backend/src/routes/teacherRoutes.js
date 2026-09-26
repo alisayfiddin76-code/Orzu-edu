@@ -1,7 +1,6 @@
 const express = require("express");
 const teacherController = require("../controllers/teacherController");
 const authMiddleware = require("../middlewares/authMiddleware");
-const { upload, setCategory } = require("../middlewares/uploadMiddleware");
 
 const router = express.Router();
 
