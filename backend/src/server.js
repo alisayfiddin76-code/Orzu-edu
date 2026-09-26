@@ -144,6 +144,11 @@ app.use('/api/v1/parent', parentRoutes);
 app.use('/api/v1/chat', chatRoutes);
 app.use('/api/v1/settings/contact', contactSettingsRoutes);
 
+// Version check endpoint — qaysi kod versiyasi ishlab turganini ko'rish uchun
+app.get('/api/version', (req, res) => {
+  res.json({ version: '7c6f646', time: new Date().toISOString(), node: process.version });
+});
+
 // Base Route for Health Check
 app.get('/', (req, res) => {
   res.status(200).json({
