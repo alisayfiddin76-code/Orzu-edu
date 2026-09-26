@@ -194,10 +194,11 @@
                 <input v-model="createForm.education" type="text" placeholder="Masalan: TATU, bakalavr" class="w-full bg-slate-900 border border-slate-700 rounded-xl px-3 py-2.5 text-sm text-white focus:outline-none focus:border-indigo-500" />
               </div>
 
-              <div>
+              <!-- Rasm yuklash vaqtinchalik o'chirilgan (Cloudinary keyinchalik ulanadi) -->
+              <!-- <div>
                 <label class="block text-xs font-semibold text-slate-400 uppercase tracking-wider mb-1.5">Rasm (Avatar)</label>
-                <input type="file" @change="handleFileUpload($event, createForm)" accept="image/*" class="w-full text-sm text-slate-400 file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-semibold file:bg-indigo-500/10 file:text-indigo-400 hover:file:bg-indigo-500/20" />
-              </div>
+                <input type="file" @change="handleFileUpload($event, createForm)" accept="image/*" />
+              </div> -->
 
               <div>
                 <label class="block text-xs font-semibold text-slate-400 uppercase tracking-wider mb-1.5">Qisqacha ma'lumot (Bio)</label>
@@ -293,10 +294,11 @@
                 <input v-model="editForm.education" type="text" class="w-full bg-slate-900 border border-slate-700 rounded-xl px-3 py-2.5 text-sm text-white focus:outline-none focus:border-indigo-500" />
               </div>
 
-              <div>
+              <!-- Rasm yuklash vaqtinchalik o'chirilgan (Cloudinary keyinchalik ulanadi) -->
+              <!-- <div>
                 <label class="block text-xs font-semibold text-slate-400 uppercase tracking-wider mb-1.5">Rasm (Yangi yuklash)</label>
-                <input type="file" @change="handleFileUpload($event, editForm)" accept="image/*" class="w-full text-sm text-slate-400 file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-semibold file:bg-indigo-500/10 file:text-indigo-400 hover:file:bg-indigo-500/20" />
-              </div>
+                <input type="file" @change="handleFileUpload($event, editForm)" accept="image/*" />
+              </div> -->
 
               <div>
                 <label class="block text-xs font-semibold text-slate-400 uppercase tracking-wider mb-1.5">Qisqacha ma'lumot (Bio)</label>
