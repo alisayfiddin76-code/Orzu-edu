@@ -22,6 +22,7 @@ const allowedOrigins = process.env.ALLOWED_ORIGINS
   : [
       'https://orzu-edu-frontend.onrender.com',
       'https://orzu-edu-5iv7.onrender.com',
+      'https://orzueducrm.vercel.app',
       'http://localhost:3000', 
       'http://localhost:3001', 
       'http://localhost:3002', 
