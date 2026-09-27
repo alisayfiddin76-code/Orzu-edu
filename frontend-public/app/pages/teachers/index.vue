@@ -57,7 +57,7 @@
           <!-- Card Head -->
           <div class="relative h-64 bg-brand-primary overflow-hidden">
             <img 
-              :src="teacher.avatar ? `${teacher.avatar}` : 'https://images.unsplash.com/photo-1500648767791-00dcc994a43e?auto=format&fit=crop&q=80&w=300&h=400'" 
+              :src="teacher.avatar ? `${teacher.avatar}` : '/images/teacher-placeholder.jpg'" 
               :alt="teacher.firstname" 
               class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500 opacity-90"
             />
