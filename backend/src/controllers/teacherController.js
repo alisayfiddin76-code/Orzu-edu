@@ -9,42 +9,47 @@ const AppError = require("../utils/appError");
  */
 exports.createTeacher = async (req, res, next) => {
   try {
-    console.log('[DEBUG] createTeacher called');
-    console.log('[DEBUG] body:', JSON.stringify(req.body));
-    
     const { firstname, lastname, phone, email, password, education, bio, status, subject, scoreType, score, experience, studentsCount, telegram } = req.body;
 
     if (!firstname || !lastname || !phone || !password) {
       return next(new AppError("Iltimos, firstname, lastname, phone, password ni to'ldiring", 400));
     }
 
-    console.log('[DEBUG] Checking if user exists...');
-    const userExists = await User.findOne({ phone });
-    if (userExists) {
-      return next(new AppError("Bu telefon raqami bilan foydalanuvchi allaqachon mavjud", 400));
+    // Telefon raqami har qanday rolda mavjudmi tekshirish
+    const existingUser = await User.findOne({ phone });
+    if (existingUser) {
+      return next(new AppError(
+        `Bu telefon raqami (${phone}) tizimda allaqachon mavjud (${existingUser.role}: ${existingUser.firstname} ${existingUser.lastname}). Boshqa raqam kiriting.`,
+        400
+      ));
     }
 
-    console.log('[DEBUG] Creating user...');
+    if (email) {
+      const existingEmail = await User.findOne({ email: email.toLowerCase() });
+      if (existingEmail) {
+        return next(new AppError(`Bu email (${email}) tizimda allaqachon mavjud.`, 400));
+      }
+    }
+
     const teacher = await User.create({
       firstname,
       lastname,
       phone,
-      email: email || null,
+      email: email || undefined,
       password,
       role: "TEACHER",
       status: status || "ACTIVE",
-      education: education || null,
-      bio: bio || null,
-      subject: subject || null,
-      scoreType: scoreType || null,
-      score: score || null,
-      experience: experience || null,
-      studentsCount: studentsCount || null,
-      telegram: telegram || null,
+      education: education || undefined,
+      bio: bio || undefined,
+      subject: subject || undefined,
+      scoreType: scoreType || undefined,
+      score: score || undefined,
+      experience: experience ? Number(experience) : undefined,
+      studentsCount: studentsCount || undefined,
+      telegram: telegram || undefined,
       avatar: null
     });
 
-    console.log('[DEBUG] User created successfully:', teacher._id);
     teacher.password = undefined;
 
     res.status(201).json({
@@ -52,10 +57,10 @@ exports.createTeacher = async (req, res, next) => {
       data: { teacher },
     });
   } catch (error) {
-    console.error('[DEBUG] createTeacher ERROR:', error.name, error.message, error.stack);
     next(error);
   }
 };
+
 
 /**
  * Get all teachers
