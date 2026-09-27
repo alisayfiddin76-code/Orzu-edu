@@ -12,9 +12,10 @@ const handleCastErrorDB = (err) => {
  * Handle Mongoose Duplicate Field Errors
  */
 const handleDuplicateFieldsDB = (err) => {
-  // Extract duplicate field value from the error message
-  const value = err.errmsg ? err.errmsg.match(/(["'])(\\?.)*?\1/)[0] : '';
-  const message = `Ushbu qiymat allaqachon mavjud: ${value}. Iltimos, boshqa qiymat kiriting!`;
+  // Extract duplicate field value from the error message safely
+  const match = err.errmsg ? err.errmsg.match(/(["'])(\\?.)*?\1/) : null;
+  const value = match ? match[0] : (err.keyValue ? Object.values(err.keyValue)[0] : 'noma\'lum qiymat');
+  const message = `Ushbu ma'lumot (telefon raqam yoki email) tizimda allaqachon mavjud: ${value}. Iltimos, boshqa qiymat kiriting!`;
   return new AppError(message, 400);
 };
 
