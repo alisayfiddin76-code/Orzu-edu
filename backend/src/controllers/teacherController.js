@@ -118,7 +118,7 @@ exports.getTeacherById = async (req, res, next) => {
 exports.updateTeacher = async (req, res, next) => {
   try {
     const { id } = req.params;
-    const { firstname, lastname, phone, email, education, bio, subject, scoreType, score, experience, studentsCount, telegram } = req.body;
+    const { firstname, lastname, phone, email, education, bio, subject, scoreType, score, experience, studentsCount, telegram, gender } = req.body;
 
     // Check unique phone if updated
     if (phone) {
@@ -128,7 +128,7 @@ exports.updateTeacher = async (req, res, next) => {
       }
     }
 
-    const updateData = { firstname, lastname, phone, email, education, bio, subject, scoreType, score, experience, studentsCount, telegram };
+    const updateData = { firstname, lastname, phone, email, education, bio, subject, scoreType, score, experience, studentsCount, telegram, gender };
 
     // Hozircha rasm yuklanmaydi (Cloudinary keyinchalik ulanadi)
     // if (req.file) { updateData.avatar = ... }

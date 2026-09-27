@@ -325,6 +325,31 @@
                 <input type="file" @change="handleFileUpload($event, editForm)" accept="image/*" />
               </div> -->
 
+              <!-- Jinsi (Gender) -->
+              <div>
+                <label class="block text-xs font-semibold text-slate-400 uppercase tracking-wider mb-2">Jinsi</label>
+                <div class="flex gap-3">
+                  <label class="flex items-center gap-2 cursor-pointer group">
+                    <div class="relative">
+                      <input type="radio" v-model="editForm.gender" value="MALE" class="sr-only" />
+                      <div :class="editForm.gender === 'MALE' ? 'border-indigo-500 bg-indigo-500/20' : 'border-slate-600 bg-slate-800'" class="w-5 h-5 rounded-full border-2 flex items-center justify-center transition-all">
+                        <div v-if="editForm.gender === 'MALE'" class="w-2 h-2 rounded-full bg-indigo-400"></div>
+                      </div>
+                    </div>
+                    <span class="text-sm text-white flex items-center gap-1.5">👨 Erkak</span>
+                  </label>
+                  <label class="flex items-center gap-2 cursor-pointer group">
+                    <div class="relative">
+                      <input type="radio" v-model="editForm.gender" value="FEMALE" class="sr-only" />
+                      <div :class="editForm.gender === 'FEMALE' ? 'border-pink-500 bg-pink-500/20' : 'border-slate-600 bg-slate-800'" class="w-5 h-5 rounded-full border-2 flex items-center justify-center transition-all">
+                        <div v-if="editForm.gender === 'FEMALE'" class="w-2 h-2 rounded-full bg-pink-400"></div>
+                      </div>
+                    </div>
+                    <span class="text-sm text-white flex items-center gap-1.5">👩 Ayol</span>
+                  </label>
+                </div>
+              </div>
+
               <div>
                 <label class="block text-xs font-semibold text-slate-400 uppercase tracking-wider mb-1.5">Qisqacha ma'lumot (Bio)</label>
                 <textarea v-model="editForm.bio" rows="3" class="w-full bg-slate-900 border border-slate-700 rounded-xl px-3 py-2 text-sm text-white focus:outline-none focus:border-indigo-500 resize-none"></textarea>
@@ -517,6 +542,7 @@ const openCreateModal = () => {
   createForm.studentsCount = ""
   createForm.telegram = ""
   createForm.avatar = null
+  createForm.gender = "MALE"
   modalError.value = ""
   showCreateModal.value = true
 }
@@ -536,6 +562,7 @@ const openEditModal = (teacher: Teacher) => {
   editForm.studentsCount = teacher.studentsCount || ""
   editForm.telegram = teacher.telegram || ""
   editForm.avatar = null
+  editForm.gender = teacher.gender || "MALE"
   modalError.value = ""
   showEditModal.value = true
 }
@@ -615,6 +642,7 @@ const updateTeacher = async () => {
     if (editForm.experience) body.experience = editForm.experience
     if (editForm.studentsCount) body.studentsCount = editForm.studentsCount
     if (editForm.telegram) body.telegram = editForm.telegram
+    body.gender = editForm.gender || "MALE"
 
     await $fetch(`/api/v1/teachers/${selectedTeacherId.value}`, {
       method: "PATCH",
