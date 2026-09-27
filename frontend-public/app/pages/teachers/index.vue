@@ -57,10 +57,14 @@
           <!-- Card Head -->
           <div class="relative h-64 bg-brand-primary overflow-hidden">
             <img 
-              :src="teacher.avatar ? `${teacher.avatar}` : '/images/teacher-placeholder.jpg'" 
+              :src="teacher.avatar ? `${teacher.avatar}` : (teacher.gender === 'FEMALE' ? '/images/teacher-placeholder-female.jpg' : '/images/teacher-placeholder.jpg')" 
               :alt="teacher.firstname" 
               class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500 opacity-90"
             />
+            <!-- ORZU EDU Teacher label -->
+            <div v-if="!teacher.avatar" class="absolute bottom-0 inset-x-0 bg-gradient-to-t from-brand-primary/95 to-transparent pt-6 pb-2 px-3">
+              <p class="text-[10px] font-black text-brand-accent uppercase tracking-[0.2em] text-center">ORZU EDU Teacher</p>
+            </div>
             <!-- Score Badge -->
             <div v-if="teacher.score" class="absolute top-4 right-4 bg-brand-primary/80 backdrop-blur-md border border-brand-accent/50 rounded-xl px-3 py-1.5 text-center shadow-lg">
               <span class="block text-[9px] font-black text-brand-accent uppercase tracking-wider">{{ teacher.scoreType || 'Natija' }}</span>

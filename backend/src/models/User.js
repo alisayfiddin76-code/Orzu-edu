@@ -108,6 +108,11 @@ const UserSchema = new mongoose.Schema(
       type: String,
       default: null,
     },
+    gender: {
+      type: String,
+      enum: ['MALE', 'FEMALE'],
+      default: 'MALE',
+    },
   },
   {
     timestamps: true, // Automatically adds createdAt and updatedAt fields

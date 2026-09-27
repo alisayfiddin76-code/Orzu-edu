@@ -180,10 +180,14 @@
             <!-- Photo -->
             <div class="relative h-48 sm:h-56 overflow-hidden bg-[#06263B]">
               <img
-                :src="teacher.avatar ? teacher.avatar : '/images/teacher-placeholder.jpg'"
+                :src="teacher.avatar ? teacher.avatar : (teacher.gender === 'FEMALE' ? '/images/teacher-placeholder-female.jpg' : '/images/teacher-placeholder.jpg')"
                 :alt="teacher.firstname"
                 class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
               />
+              <!-- ORZU EDU Teacher badge -->
+              <div v-if="!teacher.avatar" class="absolute bottom-0 inset-x-0 bg-gradient-to-t from-[#082F49]/90 to-transparent py-2 px-3">
+                <p class="text-[10px] font-black text-brand-accent uppercase tracking-widest text-center">ORZU EDU Teacher</p>
+              </div>
               <div v-if="teacher.subject" class="absolute bottom-3 left-3 bg-brand-accent text-[#06263B] px-2.5 py-1 rounded-lg text-[11px] font-black shadow">
                 {{ teacher.subject }}
               </div>

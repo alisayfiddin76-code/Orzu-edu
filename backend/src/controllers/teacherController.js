@@ -9,7 +9,7 @@ const AppError = require("../utils/appError");
  */
 exports.createTeacher = async (req, res, next) => {
   try {
-    const { firstname, lastname, phone, email, password, education, bio, status, subject, scoreType, score, experience, studentsCount, telegram } = req.body;
+    const { firstname, lastname, phone, email, password, education, bio, status, subject, scoreType, score, experience, studentsCount, telegram, gender } = req.body;
 
     if (!firstname || !lastname || !phone || !password) {
       return next(new AppError("Iltimos, firstname, lastname, phone, password ni to'ldiring", 400));
@@ -47,6 +47,7 @@ exports.createTeacher = async (req, res, next) => {
       experience: experience ? Number(experience) : undefined,
       studentsCount: studentsCount || undefined,
       telegram: telegram || undefined,
+      gender: gender || 'MALE',
       avatar: null
     });
 
