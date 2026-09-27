@@ -239,7 +239,8 @@
             <div class="relative h-40 sm:h-48 overflow-hidden bg-brand-background">
               <img v-if="ach.certificateImage" :src="ach.certificateImage" :alt="ach.studentName"
                 class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" />
-              <div v-else class="w-full h-full flex items-center justify-center text-slate-300 text-4xl">🖼</div>
+              <img v-else src="/images/certificate-placeholder.jpg" alt="ORZU EDU Certificate"
+                class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500 opacity-80" />
               <span class="absolute bottom-3 right-3 text-[10px] font-bold bg-white/90 text-brand-primary py-1 px-2.5 rounded-lg shadow">
                 📅 {{ ach.year }} yil
               </span>
@@ -377,7 +378,8 @@
             <div class="relative h-40 overflow-hidden bg-brand-background">
               <img v-if="post.image" :src="post.image" :alt="post.title"
                 class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" />
-              <div v-else class="w-full h-full flex items-center justify-center text-slate-300 text-4xl">🖼</div>
+              <img v-else src="/images/blog-placeholder.jpg" alt="ORZU EDU Blog"
+                class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500 opacity-80" />
               <span class="absolute bottom-3 right-3 text-[10px] font-bold bg-white/90 text-brand-primary py-1 px-2.5 rounded-lg shadow">
                 👁 {{ post.views }}
               </span>

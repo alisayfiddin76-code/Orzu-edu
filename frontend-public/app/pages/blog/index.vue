@@ -48,9 +48,12 @@
               :alt="post.title" 
               class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
             />
-            <div v-else class="w-full h-full bg-slate-50 flex items-center justify-center text-slate-400 font-medium">
-              🖼 Rasm mavjud emas
-            </div>
+            <img
+              v-else
+              src="/images/blog-placeholder.jpg"
+              alt="ORZU EDU Blog"
+              class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500 opacity-80"
+            />
             
             <!-- Views badge -->
             <span class="absolute bottom-4 right-4 text-xs font-bold bg-white/90 text-brand-primary py-1.5 px-3 rounded-lg backdrop-blur-md shadow-sm border border-brand-border/50">

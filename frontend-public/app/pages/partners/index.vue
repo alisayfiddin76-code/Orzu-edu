@@ -67,9 +67,12 @@
                   :alt="partner.name"
                   class="max-w-[80%] max-h-[80%] object-contain"
                 />
-                <span v-else class="text-xl font-black text-brand-primary">
-                  {{ partner.name?.substring(0, 2)?.toUpperCase() }}
-                </span>
+                <img
+                  v-else
+                  src="/images/partner-placeholder.jpg"
+                  :alt="partner.name"
+                  class="max-w-[80%] max-h-[80%] object-contain"
+                />
               </div>
               <!-- Title -->
               <div class="flex-1 min-w-0">
