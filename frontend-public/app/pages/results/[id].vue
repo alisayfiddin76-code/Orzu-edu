@@ -33,8 +33,19 @@
               :alt="achievement.studentName" 
               class="w-full h-auto object-cover hover:scale-105 transition-transform duration-500"
             />
-            <div v-else class="w-full h-64 flex items-center justify-center text-slate-400 font-medium">
-              🖼 Rasm mavjud emas
+            <div v-else class="w-full h-80 bg-gradient-to-br from-[#082F49] to-[#06263B] p-8 flex flex-col items-center justify-center relative overflow-hidden">
+              <div class="absolute inset-0 border-[8px] border-brand-accent/20 m-4 rounded-xl border-double pointer-events-none"></div>
+              <div class="absolute top-0 right-0 w-64 h-64 bg-white/5 rounded-full blur-3xl -mr-20 -mt-20 pointer-events-none"></div>
+              
+              <!-- Content -->
+              <div class="relative z-10 text-center flex flex-col items-center justify-center">
+                <div class="w-20 h-20 mb-6 bg-brand-accent/20 rounded-full flex items-center justify-center border border-brand-accent/50 shadow-[0_0_30px_rgba(242,194,48,0.2)]">
+                  <span class="text-4xl drop-shadow-lg">🏆</span>
+                </div>
+                <h2 class="text-white font-black text-2xl sm:text-3xl leading-tight uppercase tracking-widest drop-shadow-lg px-4">{{ achievement.studentName }}</h2>
+                <div class="h-1 w-20 bg-brand-accent my-5 rounded-full shadow-[0_0_10px_rgba(242,194,48,0.5)]"></div>
+                <p class="text-brand-accent text-xs sm:text-sm font-black tracking-[0.3em] uppercase">{{ achievement.course }}</p>
+              </div>
             </div>
             <div class="absolute inset-0 bg-brand-primary/10 opacity-0 hover:opacity-100 flex items-center justify-center transition-opacity duration-300 pointer-events-none">
               <span class="bg-white text-brand-primary px-4 py-2 rounded-full text-xs font-bold shadow-xl">

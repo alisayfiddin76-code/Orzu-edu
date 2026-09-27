@@ -239,8 +239,18 @@
             <div class="relative h-40 sm:h-48 overflow-hidden bg-brand-background">
               <img v-if="ach.certificateImage" :src="ach.certificateImage" :alt="ach.studentName"
                 class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" />
-              <img v-else src="/images/certificate-placeholder.jpg" alt="ORZU EDU Certificate"
-                class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500 opacity-80" />
+              <div v-else class="w-full h-full bg-gradient-to-br from-[#082F49] to-[#0C3E63] p-4 flex flex-col items-center justify-center relative overflow-hidden border-b-2 border-brand-accent">
+                <!-- Decorative background elements -->
+                <div class="absolute top-0 right-0 w-24 h-24 bg-white/5 rounded-full blur-xl -mr-5 -mt-5"></div>
+                <div class="absolute bottom-0 left-0 w-16 h-16 bg-brand-accent/10 rounded-full blur-lg -ml-5 -mb-5"></div>
+                <!-- Content -->
+                <div class="relative z-10 text-center flex flex-col items-center justify-center w-full h-full pt-1">
+                  <div class="w-8 h-8 mb-2 bg-brand-accent/20 rounded-full flex items-center justify-center border border-brand-accent/50 shadow-[0_0_10px_rgba(242,194,48,0.3)]">
+                    <span class="text-sm">🎓</span>
+                  </div>
+                  <h4 class="text-white font-black text-sm leading-tight uppercase tracking-wide truncate w-full px-2 drop-shadow-md">{{ ach.studentName }}</h4>
+                </div>
+              </div>
               <span class="absolute bottom-3 right-3 text-[10px] font-bold bg-white/90 text-brand-primary py-1 px-2.5 rounded-lg shadow">
                 📅 {{ ach.year }} yil
               </span>

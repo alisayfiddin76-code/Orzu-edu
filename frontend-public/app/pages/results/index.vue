@@ -48,12 +48,20 @@
                 :alt="ach.studentName" 
                 class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
               />
-              <img
-                v-else
-                src="/images/certificate-placeholder.jpg"
-                alt="ORZU EDU Certificate"
-                class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500 opacity-80"
-              />
+              <div v-else class="w-full h-full bg-gradient-to-br from-[#082F49] to-[#0C3E63] p-5 flex flex-col items-center justify-center relative overflow-hidden border-b-4 border-brand-accent">
+                <!-- Decorative background elements -->
+                <div class="absolute top-0 right-0 w-32 h-32 bg-white/5 rounded-full blur-2xl -mr-10 -mt-10"></div>
+                <div class="absolute bottom-0 left-0 w-24 h-24 bg-brand-accent/10 rounded-full blur-xl -ml-10 -mb-10"></div>
+                
+                <!-- Content -->
+                <div class="relative z-10 text-center flex flex-col items-center justify-center w-full h-full">
+                  <div class="w-12 h-12 mb-3 bg-brand-accent/20 rounded-full flex items-center justify-center border border-brand-accent/50 shadow-[0_0_15px_rgba(242,194,48,0.3)]">
+                    <span class="text-2xl">🎓</span>
+                  </div>
+                  <h4 class="text-white font-black text-lg leading-tight uppercase tracking-wide truncate w-full px-2 drop-shadow-md">{{ ach.studentName }}</h4>
+                  <p class="text-brand-accent text-[10px] font-black mt-2 tracking-[0.2em] uppercase bg-black/20 px-3 py-1 rounded-full border border-white/10 truncate max-w-full">{{ ach.course }}</p>
+                </div>
+              </div>
               
               <!-- Year badge -->
               <span class="absolute bottom-4 right-4 text-xs font-bold bg-white/90 text-brand-primary py-1.5 px-3 rounded-lg backdrop-blur-md shadow-sm border border-brand-border/50">
