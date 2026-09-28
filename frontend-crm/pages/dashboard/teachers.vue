@@ -194,11 +194,10 @@
                 <input v-model="createForm.education" type="text" placeholder="Masalan: TATU, bakalavr" class="w-full bg-slate-900 border border-slate-700 rounded-xl px-3 py-2.5 text-sm text-white focus:outline-none focus:border-indigo-500" />
               </div>
 
-              <!-- Rasm yuklash vaqtinchalik o'chirilgan (Cloudinary keyinchalik ulanadi) -->
-              <!-- <div>
+              <div>
                 <label class="block text-xs font-semibold text-slate-400 uppercase tracking-wider mb-1.5">Rasm (Avatar)</label>
-                <input type="file" @change="handleFileUpload($event, createForm)" accept="image/*" />
-              </div> -->
+                <input type="file" @change="handleFileUpload($event, createForm)" accept="image/*" class="w-full text-sm text-slate-400 file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-semibold file:bg-indigo-50 file:text-indigo-700 hover:file:bg-indigo-100" />
+              </div>
 
               <!-- Jinsi (Gender) -->
               <div>
@@ -319,11 +318,10 @@
                 <input v-model="editForm.education" type="text" class="w-full bg-slate-900 border border-slate-700 rounded-xl px-3 py-2.5 text-sm text-white focus:outline-none focus:border-indigo-500" />
               </div>
 
-              <!-- Rasm yuklash vaqtinchalik o'chirilgan (Cloudinary keyinchalik ulanadi) -->
-              <!-- <div>
+              <div>
                 <label class="block text-xs font-semibold text-slate-400 uppercase tracking-wider mb-1.5">Rasm (Yangi yuklash)</label>
-                <input type="file" @change="handleFileUpload($event, editForm)" accept="image/*" />
-              </div> -->
+                <input type="file" @change="handleFileUpload($event, editForm)" accept="image/*" class="w-full text-sm text-slate-400 file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-semibold file:bg-indigo-50 file:text-indigo-700 hover:file:bg-indigo-100" />
+              </div>
 
               <!-- Jinsi (Gender) -->
               <div>
@@ -582,32 +580,33 @@ const createTeacher = async () => {
   try {
     const token = useCookie("auth_token")
 
-    // JSON formatida yuboramiz (avatar keyinchalik qo'shiladi)
-    const body: Record<string, any> = {
-      firstname: createForm.firstname,
-      lastname: createForm.lastname,
-      phone: createForm.phone,
-      password: createForm.password,
-      status: createForm.status || 'ACTIVE'
+    const formData = new FormData()
+    formData.append('firstname', createForm.firstname)
+    formData.append('lastname', createForm.lastname)
+    formData.append('phone', createForm.phone)
+    formData.append('password', createForm.password)
+    formData.append('status', createForm.status || 'ACTIVE')
+    if (createForm.email) formData.append('email', createForm.email)
+    if (createForm.education) formData.append('education', createForm.education)
+    if (createForm.bio) formData.append('bio', createForm.bio)
+    if (createForm.subject) formData.append('subject', createForm.subject)
+    if (createForm.scoreType) formData.append('scoreType', createForm.scoreType)
+    if (createForm.score) formData.append('score', createForm.score)
+    if (createForm.experience) formData.append('experience', createForm.experience.toString())
+    if (createForm.studentsCount) formData.append('studentsCount', createForm.studentsCount)
+    if (createForm.telegram) formData.append('telegram', createForm.telegram)
+    formData.append('gender', createForm.gender || 'MALE')
+    
+    if (createForm.avatar) {
+      formData.append('avatar', createForm.avatar)
     }
-    if (createForm.email) body.email = createForm.email
-    if (createForm.education) body.education = createForm.education
-    if (createForm.bio) body.bio = createForm.bio
-    if (createForm.subject) body.subject = createForm.subject
-    if (createForm.scoreType) body.scoreType = createForm.scoreType
-    if (createForm.score) body.score = createForm.score
-    if (createForm.experience) body.experience = createForm.experience
-    if (createForm.studentsCount) body.studentsCount = createForm.studentsCount
-    if (createForm.telegram) body.telegram = createForm.telegram
-    body.gender = createForm.gender || 'MALE'
 
     await $fetch("/api/v1/teachers", {
       method: "POST",
       headers: {
-        "Authorization": `Bearer ${token.value}`,
-        "Content-Type": "application/json"
+        "Authorization": `Bearer ${token.value}`
       },
-      body
+      body: formData
     })
 
     successMessage.value = "O'qituvchi muvaffaqiyatli qo'shildi!"
@@ -627,30 +626,31 @@ const updateTeacher = async () => {
   try {
     const token = useCookie("auth_token")
 
-    // JSON formatida yuboramiz (avatar keyinchalik qo'shiladi)
-    const body: Record<string, any> = {
-      firstname: editForm.firstname,
-      lastname: editForm.lastname,
-      phone: editForm.phone
+    const formData = new FormData()
+    formData.append('firstname', editForm.firstname)
+    formData.append('lastname', editForm.lastname)
+    formData.append('phone', editForm.phone)
+    if (editForm.email) formData.append('email', editForm.email)
+    if (editForm.education) formData.append('education', editForm.education)
+    if (editForm.bio) formData.append('bio', editForm.bio)
+    if (editForm.subject) formData.append('subject', editForm.subject)
+    if (editForm.scoreType) formData.append('scoreType', editForm.scoreType)
+    if (editForm.score) formData.append('score', editForm.score)
+    if (editForm.experience) formData.append('experience', editForm.experience.toString())
+    if (editForm.studentsCount) formData.append('studentsCount', editForm.studentsCount)
+    if (editForm.telegram) formData.append('telegram', editForm.telegram)
+    formData.append('gender', editForm.gender || 'MALE')
+
+    if (editForm.avatar) {
+      formData.append('avatar', editForm.avatar)
     }
-    if (editForm.email) body.email = editForm.email
-    if (editForm.education) body.education = editForm.education
-    if (editForm.bio) body.bio = editForm.bio
-    if (editForm.subject) body.subject = editForm.subject
-    if (editForm.scoreType) body.scoreType = editForm.scoreType
-    if (editForm.score) body.score = editForm.score
-    if (editForm.experience) body.experience = editForm.experience
-    if (editForm.studentsCount) body.studentsCount = editForm.studentsCount
-    if (editForm.telegram) body.telegram = editForm.telegram
-    body.gender = editForm.gender || "MALE"
 
     await $fetch(`/api/v1/teachers/${selectedTeacherId.value}`, {
       method: "PATCH",
       headers: {
-        "Authorization": `Bearer ${token.value}`,
-        "Content-Type": "application/json"
+        "Authorization": `Bearer ${token.value}`
       },
-      body
+      body: formData
     })
 
     successMessage.value = "O'qituvchi ma'lumotlari muvaffaqiyatli yangilandi!"
