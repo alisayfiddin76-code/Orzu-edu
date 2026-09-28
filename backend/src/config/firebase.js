@@ -1,5 +1,16 @@
 const admin = require('firebase-admin');
-const serviceAccount = require('./firebaseServiceAccount.json');
+let serviceAccount;
+
+try {
+  if (process.env.FIREBASE_SERVICE_ACCOUNT) {
+    serviceAccount = JSON.parse(process.env.FIREBASE_SERVICE_ACCOUNT);
+  } else {
+    serviceAccount = require('./firebaseServiceAccount.json');
+  }
+} catch (error) {
+  console.error("Firebase Service Account kaliti topilmadi! Render'da 'Secret File' sifatida qo'shish kerak yoki .env orqali JSON matnini FIREBASE_SERVICE_ACCOUNT ga kiriting.");
+  throw error;
+}
 
 admin.initializeApp({
   credential: admin.credential.cert(serviceAccount),
