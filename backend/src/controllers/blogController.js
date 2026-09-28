@@ -1,6 +1,7 @@
 const BlogPost = require('../models/BlogPost');
 const AppError = require('../utils/appError');
 const path = require('path');
+const { uploadToFirebase } = require('../utils/firebaseUpload');
 
 /**
  * Helper: slugdan avtomatik yaratish
@@ -96,7 +97,7 @@ exports.createPost = async (req, res, next) => {
     const existingSlug = await BlogPost.findOne({ slug });
     if (existingSlug) slug = `${slug}-${Date.now()}`;
 
-    const image = req.file ? `/uploads/blog/${req.file.filename}` : null;
+    const image = req.file ? await uploadToFirebase(req.file, 'blog') : null;
 
     const tagsArr = tags
       ? (Array.isArray(tags) ? tags : tags.split(',').map((t) => t.trim()))
@@ -139,7 +140,7 @@ exports.updatePost = async (req, res, next) => {
       updateData.tags = Array.isArray(tags) ? tags : tags.split(',').map((t) => t.trim());
     }
     if (published !== undefined) updateData.published = published === 'true' || published === true;
-    if (req.file) updateData.image = `/uploads/blog/${req.file.filename}`;
+    if (req.file) updateData.image = await uploadToFirebase(req.file, 'blog');
 
     const post = await BlogPost.findByIdAndUpdate(req.params.id, updateData, {
       new: true,

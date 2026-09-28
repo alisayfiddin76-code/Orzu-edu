@@ -8,6 +8,7 @@ const Exam = require("../models/Exam");
 const LessonPlan = require("../models/LessonPlan");
 const Group = require("../models/Group");
 const Invoice = require("../models/Invoice");
+const { uploadToFirebase } = require('../utils/firebaseUpload');
 
 
 /**
@@ -1174,7 +1175,9 @@ exports.submitHomework = async (req, res, next) => {
     // Process uploaded files
     let submittedFiles = [];
     if (req.files && req.files.length > 0) {
-      submittedFiles = req.files.map(file => `/uploads/homework-submissions/${file.filename}`);
+      submittedFiles = await Promise.all(
+        req.files.map(file => uploadToFirebase(file, 'homework-submissions'))
+      );
     }
 
     // Check if submission already exists

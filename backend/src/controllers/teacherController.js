@@ -1,6 +1,7 @@
 const User = require("../models/User");
 const Group = require("../models/Group");
 const AppError = require("../utils/appError");
+const { uploadToFirebase } = require('../utils/firebaseUpload');
 
 /**
  * Create a new teacher manually
@@ -31,25 +32,27 @@ exports.createTeacher = async (req, res, next) => {
       }
     }
 
-    const teacher = await User.create({
-      firstname,
-      lastname,
-      phone,
-      email: email || undefined,
-      password,
-      role: "TEACHER",
-      status: status || "ACTIVE",
-      education: education || undefined,
-      bio: bio || undefined,
-      subject: subject || undefined,
-      scoreType: scoreType || undefined,
-      score: score || undefined,
-      experience: experience ? Number(experience) : undefined,
-      studentsCount: studentsCount || undefined,
-      telegram: telegram || undefined,
-      gender: gender || 'MALE',
-      avatar: null
-    });
+      const avatar = req.file ? await uploadToFirebase(req.file, 'teachers') : null;
+
+      const teacher = await User.create({
+        firstname,
+        lastname,
+        phone,
+        email: email || undefined,
+        password,
+        role: "TEACHER",
+        status: status || "ACTIVE",
+        education: education || undefined,
+        bio: bio || undefined,
+        subject: subject || undefined,
+        scoreType: scoreType || undefined,
+        score: score || undefined,
+        experience: experience ? Number(experience) : undefined,
+        studentsCount: studentsCount || undefined,
+        telegram: telegram || undefined,
+        gender: gender || 'MALE',
+        avatar
+      });
 
     teacher.password = undefined;
 
@@ -130,8 +133,9 @@ exports.updateTeacher = async (req, res, next) => {
 
     const updateData = { firstname, lastname, phone, email, education, bio, subject, scoreType, score, experience, studentsCount, telegram, gender };
 
-    // Hozircha rasm yuklanmaydi (Cloudinary keyinchalik ulanadi)
-    // if (req.file) { updateData.avatar = ... }
+    if (req.file) {
+      updateData.avatar = await uploadToFirebase(req.file, 'teachers');
+    }
 
     const teacher = await User.findOneAndUpdate(
       { _id: id, role: "TEACHER" },

@@ -29,3 +29,6 @@ Thumbs.db
 # Misc
 *.swp
 *.swo
+
+# Firebase credentials
+*firebaseServiceAccount.json

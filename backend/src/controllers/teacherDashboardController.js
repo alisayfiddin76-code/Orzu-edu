@@ -3,6 +3,7 @@ const LessonPlan = require("../models/LessonPlan");
 const HomeworkSubmission = require("../models/HomeworkSubmission");
 const Exam = require("../models/Exam");
 const AppError = require("../utils/appError");
+const { uploadToFirebase } = require('../utils/firebaseUpload');
 
 /**
  * Get dashboard summary for teacher (Today's classes, unchecked homework count, 12-hour deadline alerts, upcoming exams)
@@ -113,11 +114,11 @@ exports.createLessonPlan = async (req, res, next) => {
       }
     }
 
-    const materials = [];
+    let materials = [];
     if (req.files && req.files.length > 0) {
-      req.files.forEach((file) => {
-        materials.push(`/uploads/lesson-plans/${file.filename}`);
-      });
+      materials = await Promise.all(
+        req.files.map(file => uploadToFirebase(file, 'lesson-plans'))
+      );
     }
 
     const lessonPlan = await LessonPlan.create({
@@ -590,7 +591,9 @@ exports.updateLessonPlan = async (req, res, next) => {
 
     // Handle new file uploads
     if (req.files && req.files.length > 0) {
-      const newMaterials = req.files.map((file) => `/uploads/lesson-plans/${file.filename}`);
+      const newMaterials = await Promise.all(
+        req.files.map(file => uploadToFirebase(file, 'lesson-plans'))
+      );
       lessonPlan.materials = [...lessonPlan.materials, ...newMaterials];
     }
 

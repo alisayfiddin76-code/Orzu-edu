@@ -1,6 +1,7 @@
 const express = require("express");
 const teacherController = require("../controllers/teacherController");
 const authMiddleware = require("../middlewares/authMiddleware");
+const { upload } = require("../middlewares/uploadMiddleware");
 
 const router = express.Router();
 
@@ -12,6 +13,7 @@ router.post(
   "/",
   authMiddleware.protect,
   authMiddleware.restrictTo("SUPER_ADMIN"),
+  upload.single("avatar"),
   teacherController.createTeacher
 );
 
@@ -36,6 +38,7 @@ router.patch(
   "/:id",
   authMiddleware.protect,
   authMiddleware.restrictTo("SUPER_ADMIN", "MANAGER"),
+  upload.single("avatar"),
   teacherController.updateTeacher
 );
 

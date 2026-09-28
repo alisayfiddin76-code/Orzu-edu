@@ -1,5 +1,6 @@
 const Achievement = require('../models/Achievement');
 const AppError = require('../utils/appError');
+const { uploadToFirebase } = require('../utils/firebaseUpload');
 
 /**
  * GET /api/v1/achievements
@@ -31,7 +32,7 @@ exports.create = async (req, res, next) => {
     }
 
     const certificateImage = req.file
-      ? `/uploads/achievements/${req.file.filename}`
+      ? await uploadToFirebase(req.file, 'achievements')
       : null;
 
     const achievement = await Achievement.create({
@@ -56,7 +57,7 @@ exports.create = async (req, res, next) => {
 exports.update = async (req, res, next) => {
   try {
     const updateData = { ...req.body };
-    if (req.file) updateData.certificateImage = `/uploads/achievements/${req.file.filename}`;
+    if (req.file) updateData.certificateImage = await uploadToFirebase(req.file, 'achievements');
     if (updateData.year) updateData.year = Number(updateData.year);
     if (updateData.order) updateData.order = Number(updateData.order);
 

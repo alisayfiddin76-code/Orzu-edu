@@ -1,5 +1,6 @@
 const Partner = require('../models/Partner');
 const AppError = require('../utils/appError');
+const { uploadToFirebase } = require('../utils/firebaseUpload');
 
 /**
  * GET /api/v1/partners
@@ -45,7 +46,7 @@ exports.create = async (req, res, next) => {
 
     if (!name) return next(new AppError('Hamkor nomi talab qilinadi', 400));
 
-    const logo = req.file ? `/uploads/partners/${req.file.filename}` : null;
+    const logo = req.file ? await uploadToFirebase(req.file, 'partners') : null;
 
     const partner = await Partner.create({
       name,
@@ -68,7 +69,7 @@ exports.create = async (req, res, next) => {
 exports.update = async (req, res, next) => {
   try {
     const updateData = { ...req.body };
-    if (req.file) updateData.logo = `/uploads/partners/${req.file.filename}`;
+    if (req.file) updateData.logo = await uploadToFirebase(req.file, 'partners');
     if (updateData.order) updateData.order = Number(updateData.order);
     if (updateData.active !== undefined) {
       updateData.active = updateData.active !== 'false' && updateData.active !== false;

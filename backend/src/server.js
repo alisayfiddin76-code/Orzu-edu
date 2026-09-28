@@ -101,6 +101,7 @@ const studentOfMonthRoutes = require('./routes/studentOfMonthRoutes');
 const parentRoutes = require('./routes/parentRoutes');
 const chatRoutes = require('./routes/chatRoutes');
 const contactSettingsRoutes = require('./routes/contactSettingsRoutes');
+const uploadRoutes = require('./routes/uploadRoutes');
 
 // Inline Public Stats Endpoint (no auth required)
 const Student = require('./models/Student');
@@ -138,6 +139,7 @@ app.use('/api/v1/blog', blogRoutes);
 app.use('/api/v1/achievements', achievementRoutes);
 app.use('/api/v1/partners', partnerRoutes);
 app.use('/api/v1/messages', messageRoutes);
+app.use('/api/v1/upload', uploadRoutes);
 app.use('/api/v1/finance', financeRoutes);
 app.use('/api/v1/student-of-month', studentOfMonthRoutes);
 app.use('/api/v1/parent', parentRoutes);
