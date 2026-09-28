@@ -13,6 +13,9 @@ const globalErrorHandler = require('./controllers/errorController');
 // Initialize Express App
 const app = express();
 
+// Trust proxy for load balancers (Render, Vercel, etc.)
+app.set('trust proxy', 1);
+
 // Connect to MongoDB
 connectDB();
 
