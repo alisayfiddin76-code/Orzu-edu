@@ -387,8 +387,10 @@ const clearDate = () => {
 const birthDateDisplay = computed(() => {
   if (!leadForm.birthDate) return '';
   const [y, m, d] = leadForm.birthDate.split('-');
+  if (!y || !m || !d) return leadForm.birthDate;
   const monthIdx = parseInt(m, 10) - 1;
-  return `${parseInt(d, 10)} ${monthNames[monthIdx]} ${y}`;
+  const monthName = monthNames[monthIdx] || '';
+  return `${parseInt(d, 10)} ${monthName} ${y}`;
 });
 
 // Highlight logic
@@ -413,8 +415,10 @@ const handleOutsideClick = (e: MouseEvent) => {
 watch(() => leadForm.birthDate, (val) => {
   if (val) {
     const [y, m] = val.split('-');
-    calYear.value = parseInt(y, 10);
-    calMonth.value = parseInt(m, 10) - 1;
+    if (y && m) {
+      calYear.value = parseInt(y, 10);
+      calMonth.value = parseInt(m, 10) - 1;
+    }
   }
 });
 
