@@ -51,7 +51,7 @@
             <tr v-for="partner in partners" :key="partner._id" class="hover:bg-slate-800/30 transition-colors">
               <td class="px-6 py-4 whitespace-nowrap">
                 <img 
-                  v-if="partner.logo" 
+                  v-if="partner.logo && !partner.logo.includes('undefined')" 
                   :src="`${partner.logo}`" 
                   class="w-16 h-12 object-contain rounded bg-slate-950 border border-slate-800 p-1"
                 />

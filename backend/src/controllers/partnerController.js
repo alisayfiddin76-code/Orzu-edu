@@ -2,6 +2,15 @@ const Partner = require('../models/Partner');
 const AppError = require('../utils/appError');
 const { uploadToFirebase } = require('../utils/firebaseUpload');
 
+const sanitizePartner = (partner) => {
+  const p = partner.toObject ? partner.toObject() : { ...partner };
+  if (p.logo && (p.logo.includes('undefined') || p.logo === 'null')) {
+    Partner.findByIdAndUpdate(p._id, { logo: null }).exec().catch(() => {});
+    p.logo = null;
+  }
+  return p;
+};
+
 /**
  * GET /api/v1/partners
  * Hammaga ochiq — faqat active hamkorlar
@@ -9,10 +18,11 @@ const { uploadToFirebase } = require('../utils/firebaseUpload');
 exports.getAll = async (req, res, next) => {
   try {
     const partners = await Partner.find({ active: true }).sort({ order: 1, createdAt: 1 });
+    const cleanPartners = partners.map(sanitizePartner);
     res.status(200).json({
       status: 'success',
-      results: partners.length,
-      data: { partners },
+      results: cleanPartners.length,
+      data: { partners: cleanPartners },
     });
   } catch (error) {
     next(error);
@@ -26,10 +36,11 @@ exports.getAll = async (req, res, next) => {
 exports.getAllAdmin = async (req, res, next) => {
   try {
     const partners = await Partner.find().sort({ order: 1, createdAt: 1 });
+    const cleanPartners = partners.map(sanitizePartner);
     res.status(200).json({
       status: 'success',
-      results: partners.length,
-      data: { partners },
+      results: cleanPartners.length,
+      data: { partners: cleanPartners },
     });
   } catch (error) {
     next(error);

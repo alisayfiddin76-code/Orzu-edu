@@ -18,7 +18,7 @@
             : 'bg-[#06263B]/30 backdrop-blur-sm border border-white/10 hover:border-white/30'"
         >
           <img 
-            v-if="partner.logo" 
+            v-if="partner.logo && !partner.logo.includes('undefined')" 
             :src="partner.logo" 
             :alt="partner.name" 
             class="max-w-full max-h-full object-contain filter drop-shadow-[0_4px_12px_rgba(0,0,0,0.5)]" 

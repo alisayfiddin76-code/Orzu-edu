@@ -303,7 +303,7 @@
               <!-- Logo -->
               <div class="w-16 h-16 shrink-0 rounded-xl bg-white/5 border border-white/10 flex items-center justify-center overflow-hidden group-hover:border-brand-accent/30 transition-all duration-300">
                 <img 
-                  v-if="partner.logo" 
+                  v-if="partner.logo && !partner.logo.includes('undefined')" 
                   :src="partner.logo" 
                   :alt="partner.name"
                   class="max-w-[80%] max-h-[80%] object-contain filter brightness-110"
