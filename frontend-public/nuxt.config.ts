@@ -55,6 +55,27 @@ export default defineNuxtConfig({
     host: '0.0.0.0'
   },
 
+  // Icon configuration (icons are bundled into client to avoid /api/_nuxt_icon proxy conflicts)
+  icon: {
+    clientBundle: {
+      scan: true,
+      icons: [
+        'ph:moon-stars-fill',
+        'ph:star-four-fill',
+        'ph:planet-duotone',
+        'ph:planet-fill',
+        'ph:phone-duotone',
+        'ph:map-pin-duotone',
+        'ph:telegram-logo',
+        'ph:instagram-logo',
+        'ph:youtube-logo',
+        'fa6-brands:instagram',
+        'fa6-brands:telegram',
+        'fa6-brands:youtube',
+      ],
+    },
+  },
+
   // Proxy API requests to backend
   routeRules: {
     '/api/**': { proxy: `${process.env.API_PROXY_TARGET || 'https://orzu-edu.onrender.com'}/api/**` },
