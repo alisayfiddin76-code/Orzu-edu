@@ -46,17 +46,52 @@ const cleanPhone = (val) => {
  * Phone = login, birthDate (YYYY-MM-DD) = password
  */
 exports.register = async (req, res) => {
+  let user = null;
+  let newLead = null;
   try {
-    const { firstname, lastname, phone, email, password, role, avatar, birthDate, parentPhone, course, source } = req.body;
+    const { firstname, lastname, phone, email, password, avatar, birthDate, parentPhone, course, source } = req.body;
+
+    const role = 'STUDENT';
+
+    const trimmedFirst = String(firstname || '').trim();
+    const trimmedLast = String(lastname || '').trim();
+
+    if (!trimmedFirst) {
+      return res.status(400).json({
+        status: 'error',
+        message: "Iltimos, ismingizni kiriting",
+      });
+    }
+
+    if (!phone) {
+      return res.status(400).json({
+        status: 'error',
+        message: 'Telefon raqami majburiy',
+      });
+    }
+
+    // Familiya kiritilmagan bo'lsa, ismdan ajratish yoki ismni o'zini qo'yish (Mongoose validation xato bermasligi uchun)
+    let finalFirstname = trimmedFirst;
+    let finalLastname = trimmedLast;
+    if (!finalLastname) {
+      const parts = finalFirstname.split(/\s+/);
+      if (parts.length > 1) {
+        finalFirstname = parts[0];
+        finalLastname = parts.slice(1).join(' ');
+      } else {
+        finalLastname = finalFirstname;
+      }
+    }
 
     const formattedPhone = cleanPhone(phone);
+    const finalParentPhone = parentPhone ? cleanPhone(parentPhone) : formattedPhone;
 
     // BirthDate dan passwordni aniqlash
     let resolvedPassword = password;
     let birthdateFormatted = null;
 
     if (birthDate) {
-      birthdateFormatted = birthDate.replace(/-/g, '');
+      birthdateFormatted = String(birthDate).replace(/-/g, '');
       resolvedPassword = birthdateFormatted; 
     }
 
@@ -71,25 +106,28 @@ exports.register = async (req, res) => {
     if (userExists) {
       return res.status(400).json({
         status: 'error',
-        message: "Foydalanuvchi ushbu telefon raqami bilan allaqachon ro'yxatdan o'tgan",
+        message: "Bu telefon raqami bilan allaqachon ro'yxatdan o'tilgan",
       });
     }
 
-    const user = await User.create({
-      firstname,
-      lastname,
+    // Email temp bo'lsa saqlamaymiz, chunki User modelda email: unique
+    const finalEmail = (email && !email.includes('@temp.uz')) ? email.toLowerCase().trim() : undefined;
+
+    user = await User.create({
+      firstname: finalFirstname,
+      lastname: finalLastname,
       phone: formattedPhone,
-      email: email || undefined,
+      email: finalEmail,
       password: resolvedPassword,
-      role: role || 'STUDENT',
+      role,
       avatar,
       birthDate: birthdateFormatted, 
     });
 
     // Create a Lead record so CRM admins see the application
     const Lead = require('../models/Lead');
-    const newLead = await Lead.create({
-      fullname: `${firstname} ${lastname}`.trim(),
+    newLead = await Lead.create({
+      fullname: `${finalFirstname} ${finalLastname}`.trim(),
       phone: formattedPhone,
       course: course || null,
       source: source || 'WEBSITE',
@@ -97,17 +135,14 @@ exports.register = async (req, res) => {
       birthDate: birthdateFormatted,
     });
 
-    if ((role || 'STUDENT') === 'STUDENT') {
-      const Student = require('../models/Student');
-      const formattedParentPhone = parentPhone ? cleanPhone(parentPhone) : null;
-      await Student.create({
-        user: user._id,
-        lead: newLead._id,
-        parentPhone: formattedParentPhone,
-        status: 'ACTIVE',
-        source: source || 'WEBSITE',
-      });
-    }
+    const Student = require('../models/Student');
+    await Student.create({
+      user: user._id,
+      lead: newLead._id,
+      parentPhone: finalParentPhone,
+      status: 'ACTIVE',
+      source: source || 'WEBSITE',
+    });
 
     // Token yaratish
     const token = generateToken(user._id);
@@ -123,9 +158,35 @@ exports.register = async (req, res) => {
       },
     });
   } catch (error) {
+    console.error('Registration error details:', error);
+    // Yarim yaratilgan yozuvlarni tozalaymiz
+    try {
+      if (newLead) await require('../models/Lead').findByIdAndDelete(newLead._id);
+      if (user) await User.findByIdAndDelete(user._id);
+    } catch (cleanupErr) {
+      console.error('Register rollback error:', cleanupErr.message);
+    }
+
+    if (error.name === 'ValidationError') {
+      const msgs = Object.values(error.errors).map((e) => e.message);
+      return res.status(400).json({
+        status: 'error',
+        message: `Kiritilgan ma'lumotlar noto'g'ri: ${msgs.join('. ')}`,
+      });
+    }
+
+    if (error.code === 11000) {
+      const field = Object.keys(error.keyPattern || {})[0] || 'ma\'lumot';
+      const fieldName = field === 'phone' ? 'telefon raqami' : (field === 'email' ? 'email' : field);
+      return res.status(400).json({
+        status: 'error',
+        message: `Ushbu ${fieldName} bilan allaqachon ro'yxatdan o'tilgan`,
+      });
+    }
+
     res.status(500).json({
       status: 'error',
-      message: "Ro'yxatdan o'tishda xatolik yuz berdi",
+      message: error.message || "Ro'yxatdan o'tishda xatolik yuz berdi",
       error: error.message,
     });
   }

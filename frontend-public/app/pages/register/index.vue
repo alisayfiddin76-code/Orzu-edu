@@ -416,7 +416,12 @@ const isFormValid = computed(() => (
 // ═══════════════════════════════════════════
 const formatPhone = (event: Event, target: 'phone' | 'parentPhone') => {
   const input = event.target as HTMLInputElement;
-  let digits = input.value.replace(/\D/g, '').slice(0, 9);
+  let digits = input.value.replace(/\D/g, '');
+  // Agar +998 yoki 998 bilan birga paste qilingan bo'lsa, prefiksni olib tashlaymiz
+  if (digits.startsWith('998') && digits.length >= 12) {
+    digits = digits.slice(3);
+  }
+  digits = digits.slice(0, 9);
   let formatted = digits;
   if (digits.length > 2) formatted = digits.slice(0, 2) + ' ' + digits.slice(2);
   if (digits.length > 5) formatted = digits.slice(0, 2) + ' ' + digits.slice(2, 5) + ' ' + digits.slice(5);
@@ -453,11 +458,14 @@ const submitLead = async () => {
   const birthDateFormatted = leadForm.birthDate;
 
   try {
+    const nameParts = leadForm.fullname.trim().split(/\s+/);
+    const firstname = nameParts[0] || 'O\'quvchi';
+    const lastname = nameParts.length > 1 ? nameParts.slice(1).join(' ') : firstname;
+
     const userData = {
-      firstname: leadForm.fullname.split(' ')[0] || leadForm.fullname,
-      lastname: leadForm.fullname.split(' ').slice(1).join(' ') || '',
+      firstname,
+      lastname,
       phone: fullPhone,
-      email: `${leadForm.phone}@temp.uz`,
       password: birthDateFormatted,
       birthDate: birthDateFormatted,
       role: 'STUDENT',
@@ -466,17 +474,24 @@ const submitLead = async () => {
       source: leadForm.source,
     };
 
-    const userResponse = await $fetch("/api/v1/auth/register", {
+    await $fetch("/api/v1/auth/register", {
       method: "POST",
       body: userData
     });
 
     submitSuccess.value = true;
   } catch (err: any) {
-    if (err?.data?.message?.includes('telefon')) {
+    const errorData = err?.data || err?.response?._data;
+    const status = err?.statusCode || err?.response?.status;
+    const msg = errorData?.message || errorData?.error;
+    if (msg?.includes('telefon') || msg?.includes('raqam')) {
       submitError.value = "Bu telefon raqami allaqachon ro'yxatdan o'tgan.";
+    } else if (msg) {
+      submitError.value = msg;
+    } else if (!status || status >= 500) {
+      submitError.value = "Server hozir javob bermayapti (u uyg'onayotgan bo'lishi mumkin). Iltimos, 30 soniyadan keyin qayta urinib ko'ring.";
     } else {
-      submitError.value = err?.data?.message || "Xatolik yuz berdi. Qayta urinib ko'ring.";
+      submitError.value = "Ro'yxatdan o'tishda xatolik yuz berdi. Qayta urinib ko'ring.";
     }
   } finally {
     submitting.value = false;
