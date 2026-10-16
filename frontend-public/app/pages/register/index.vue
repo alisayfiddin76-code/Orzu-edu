@@ -54,10 +54,30 @@
               O'quvchi ma'lumotlari
             </h2>
             <div class="space-y-5">
-              <!-- Full Name -->
-              <div>
-                <label for="reg-fullname" class="form-label">Ism va Familiya <span class="text-red-400">*</span></label>
-                <input id="reg-fullname" v-model="leadForm.fullname" type="text" placeholder="Masalan: Sherzod Umarov" required class="form-input" />
+              <!-- Ism va Familiya (Alohida maydonlar) -->
+              <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                <div>
+                  <label for="reg-firstname" class="form-label">Ism <span class="text-red-400">*</span></label>
+                  <input
+                    id="reg-firstname"
+                    v-model="leadForm.firstname"
+                    type="text"
+                    placeholder="Masalan: Sherzod"
+                    required
+                    class="form-input"
+                  />
+                </div>
+                <div>
+                  <label for="reg-lastname" class="form-label">Familiya <span class="text-red-400">*</span></label>
+                  <input
+                    id="reg-lastname"
+                    v-model="leadForm.lastname"
+                    type="text"
+                    placeholder="Masalan: Umarov"
+                    required
+                    class="form-input"
+                  />
+                </div>
               </div>
 
               <!-- Student Phone -->
@@ -277,7 +297,8 @@ const route = useRoute();
 // Form State (MUST be declared first — used by calendar, validation, etc.)
 // ═══════════════════════════════════════════
 const leadForm = reactive({
-  fullname: "",
+  firstname: "",
+  lastname: "",
   phone: "",
   parentPhone: "",
   birthDate: "",     // YYYY-MM-DD
@@ -404,7 +425,8 @@ onUnmounted(() => document.removeEventListener('mousedown', handleOutsideClick))
 // Validation
 // ═══════════════════════════════════════════
 const isFormValid = computed(() => (
-  leadForm.fullname.trim().length >= 2 &&
+  leadForm.firstname.trim().length >= 2 &&
+  leadForm.lastname.trim().length >= 2 &&
   leadForm.phone.length === 9 &&
   leadForm.parentPhone.length === 9 &&
   leadForm.birthDate !== "" &&
@@ -458,9 +480,8 @@ const submitLead = async () => {
   const birthDateFormatted = leadForm.birthDate;
 
   try {
-    const nameParts = leadForm.fullname.trim().split(/\s+/);
-    const firstname = nameParts[0] || 'O\'quvchi';
-    const lastname = nameParts.length > 1 ? nameParts.slice(1).join(' ') : firstname;
+    const firstname = leadForm.firstname.trim();
+    const lastname = leadForm.lastname.trim();
 
     const userData = {
       firstname,
