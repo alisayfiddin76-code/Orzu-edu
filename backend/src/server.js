@@ -51,19 +51,57 @@ app.use(cors({
 }));
 
 // ---- Rate Limiting ----
-// Umumiy API rate limit: 1 daqiqada 200 ta so'rov
+// MUHIM: Backend Cloudflare (Render) va Vercel proxy ortida ishlaydi.
+// req.ip barcha foydalanuvchilar uchun bir xil proxy IP bo'lib qoladi,
+// natijada hamma bitta umumiy limitga tushib, 429 xatosi chiqardi.
+// Shuning uchun kalit: tizimga kirganlar uchun user ID, qolganlar uchun haqiqiy mijoz IP.
+const { ipKeyGenerator } = require('express-rate-limit');
+const jwt = require('jsonwebtoken');
+
+const getClientIp = (req) => {
+  const xff = req.headers['x-forwarded-for'];
+  const firstForwarded = xff ? String(xff).split(',')[0].trim() : '';
+  return firstForwarded || req.headers['cf-connecting-ip'] || req.ip || 'unknown';
+};
+
+const ipKey = (req) => {
+  const ip = getClientIp(req);
+  try {
+    return `ip:${ipKeyGenerator(ip)}`;
+  } catch {
+    return `ip:${ip}`;
+  }
+};
+
+const userOrIpKey = (req) => {
+  const auth = req.headers.authorization;
+  if (auth && auth.startsWith('Bearer ')) {
+    try {
+      const decoded = jwt.verify(auth.slice(7), process.env.JWT_SECRET);
+      if (decoded && decoded.id) return `user:${decoded.id}`;
+    } catch {
+      // Yaroqsiz token — IP bo'yicha hisoblanadi
+    }
+  }
+  return ipKey(req);
+};
+
+// Umumiy API rate limit: har bir foydalanuvchi/IP uchun 1 daqiqada 300 ta so'rov
 const generalLimiter = rateLimit({
   windowMs: 60 * 1000,      // 1 daqiqa
-  max: 200,
+  max: 300,
+  keyGenerator: userOrIpKey,
   message: { status: 'error', message: "Juda ko'p so'rov. Iltimos, bir daqiqa kuting." },
   standardHeaders: true,
   legacyHeaders: false,
 });
 
-// Login uchun kattaroq cheklov: 15 daqiqada 15 ta urinish
+// Login uchun cheklov: har bir IP uchun 15 daqiqada 20 ta muvaffaqiyatsiz urinish
 const loginLimiter = rateLimit({
   windowMs: 15 * 60 * 1000, // 15 daqiqa
-  max: 15,
+  max: 20,
+  keyGenerator: ipKey,
+  skipSuccessfulRequests: true, // Muvaffaqiyatli kirishlar hisobga olinmaydi
   message: { status: 'error', message: "Juda ko'p urinish. 15 daqiqadan keyin qayta urining." },
   standardHeaders: true,
   legacyHeaders: false,

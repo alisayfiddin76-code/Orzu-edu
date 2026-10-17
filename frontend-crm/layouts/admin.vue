@@ -129,6 +129,7 @@ const fetchNotifications = async () => {
         Authorization: `Bearer ${authToken.value}`
       }
     })
+    if (!res.ok) return
     const data = await res.json()
     if (data.status === 'success') {
       notificationCount.value = data.data.count
