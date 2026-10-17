@@ -126,55 +126,154 @@
 
     <!-- Payment Modal -->
     <div v-if="showPayModal" class="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm">
-      <div class="bg-slate-900 border border-slate-700 rounded-2xl w-full max-w-md shadow-2xl overflow-hidden">
-        <div class="p-5 border-b border-slate-800 flex items-center justify-between">
+      <div class="bg-slate-900 border border-slate-700 rounded-2xl w-full max-w-xl shadow-2xl overflow-hidden my-4 max-h-[92vh] flex flex-col">
+        <div class="p-5 border-b border-slate-800 flex items-center justify-between shrink-0">
           <h3 class="text-lg font-bold text-white">To'lov qabul qilish</h3>
           <button @click="closePayModal" class="text-slate-400 hover:text-white transition-colors">✕</button>
         </div>
-        <div class="p-6 space-y-4">
+        <div class="p-6 space-y-4 overflow-y-auto">
           <div v-if="payError" class="p-3 bg-rose-500/10 border border-rose-500/20 text-rose-400 text-sm rounded-xl">
             {{ payError }}
           </div>
-          <div>
-            <p class="text-[10px] font-bold text-slate-500 uppercase tracking-wider mb-1">O'quvchi</p>
-            <p class="text-white font-semibold">{{ payData.studentName }}</p>
+          
+          <div class="flex items-center justify-between">
+            <div>
+              <p class="text-[10px] font-bold text-slate-500 uppercase tracking-wider mb-0.5">O'quvchi</p>
+              <p class="text-white font-semibold text-base">{{ payData.studentName }}</p>
+            </div>
+            <div v-if="payData.groupTitle" class="text-right">
+              <p class="text-[10px] font-bold text-slate-500 uppercase tracking-wider mb-0.5">Guruh</p>
+              <p class="text-indigo-300 font-semibold text-sm">{{ payData.groupTitle }}</p>
+            </div>
           </div>
-          <!-- Chegirma info -->
+
+          <!-- Loading prorated preview -->
+          <div v-if="proratedLoading" class="p-4 rounded-xl bg-slate-800/50 border border-slate-700/50 text-center text-xs text-slate-400">
+            <span class="inline-block w-3.5 h-3.5 border-2 border-slate-400 border-t-white rounded-full animate-spin mr-2 align-middle"></span>
+            To'lov variantlari hisoblanmoqda...
+          </div>
+
+          <!-- PRORATED A/B/C VARIANT SELECTION (agar 1-sana bo'lmasa) -->
+          <div
+            v-else-if="proratedPreview && !proratedPreview.is_first_day"
+            class="space-y-2.5 border border-amber-500/30 rounded-2xl bg-amber-500/5 p-4"
+          >
+            <div class="flex items-center gap-2 mb-1">
+              <span class="text-amber-400 text-base">📅</span>
+              <div>
+                <p class="text-xs font-bold text-amber-300">To'lov Variantini Tanlang</p>
+                <p class="text-[11px] text-slate-400">
+                  {{ proratedPreview.days_remaining }} kun qolgan ({{ proratedPreview.current_month }}, {{ proratedPreview.days_in_month }} kunli oy)
+                </p>
+              </div>
+            </div>
+
+            <div class="grid grid-cols-1 sm:grid-cols-3 gap-2.5">
+              <!-- A-Variant -->
+              <button
+                type="button"
+                @click="selectedVariant = 'A'"
+                :class="['p-3 rounded-xl border-2 text-left transition-all w-full flex flex-col justify-between', selectedVariant === 'A' ? 'border-indigo-500 bg-indigo-600/15' : 'border-slate-700 bg-slate-900/60 hover:border-slate-600']"
+              >
+                <div>
+                  <div class="flex items-center justify-between mb-1.5">
+                    <span class="text-[11px] font-bold text-indigo-400 uppercase tracking-wider">A-Variant</span>
+                    <div :class="['w-3.5 h-3.5 rounded-full border-2 flex items-center justify-center', selectedVariant === 'A' ? 'border-indigo-400' : 'border-slate-600']">
+                      <div v-if="selectedVariant === 'A'" class="w-1.5 h-1.5 rounded-full bg-indigo-400"></div>
+                    </div>
+                  </div>
+                  <p class="text-base font-black text-white mb-0.5">{{ formatMoney(proratedPreview.variant_a?.amount) }}</p>
+                  <p class="text-[11px] text-slate-400 line-clamp-2 leading-snug">{{ proratedPreview.variant_a?.description }}</p>
+                </div>
+                <p class="text-[10px] text-slate-500 mt-2">⏭ Keyingi: <span class="text-slate-300 font-semibold">{{ proratedPreview.variant_a?.next_billing_month }}</span></p>
+              </button>
+
+              <!-- B-Variant -->
+              <button
+                type="button"
+                @click="selectedVariant = 'B'"
+                :class="['p-3 rounded-xl border-2 text-left transition-all w-full flex flex-col justify-between', selectedVariant === 'B' ? 'border-emerald-500 bg-emerald-600/15' : 'border-slate-700 bg-slate-900/60 hover:border-slate-600']"
+              >
+                <div>
+                  <div class="flex items-center justify-between mb-1.5">
+                    <span class="text-[11px] font-bold text-emerald-400 uppercase tracking-wider">B-Variant</span>
+                    <div :class="['w-3.5 h-3.5 rounded-full border-2 flex items-center justify-center', selectedVariant === 'B' ? 'border-emerald-400' : 'border-slate-600']">
+                      <div v-if="selectedVariant === 'B'" class="w-1.5 h-1.5 rounded-full bg-emerald-400"></div>
+                    </div>
+                  </div>
+                  <p class="text-base font-black text-white mb-0.5">{{ formatMoney(proratedPreview.variant_b?.amount) }}</p>
+                  <p class="text-[11px] text-slate-400 line-clamp-2 leading-snug">{{ proratedPreview.variant_b?.description }}</p>
+                </div>
+                <p class="text-[10px] text-slate-500 mt-2">⏭ Keyingi: <span class="text-slate-300 font-semibold">{{ proratedPreview.variant_b?.next_billing_month }}</span></p>
+              </button>
+
+              <!-- C-Variant -->
+              <button
+                type="button"
+                @click="selectedVariant = 'C'"
+                :class="['p-3 rounded-xl border-2 text-left transition-all w-full flex flex-col justify-between', selectedVariant === 'C' ? 'border-sky-500 bg-sky-600/15' : 'border-slate-700 bg-slate-900/60 hover:border-slate-600']"
+              >
+                <div>
+                  <div class="flex items-center justify-between mb-1.5">
+                    <span class="text-[11px] font-bold text-sky-400 uppercase tracking-wider">C-Variant</span>
+                    <div :class="['w-3.5 h-3.5 rounded-full border-2 flex items-center justify-center', selectedVariant === 'C' ? 'border-sky-400' : 'border-slate-600']">
+                      <div v-if="selectedVariant === 'C'" class="w-1.5 h-1.5 rounded-full bg-sky-400"></div>
+                    </div>
+                  </div>
+                  <p class="text-base font-black text-white mb-0.5">{{ formatMoney(proratedPreview.variant_c?.amount) }}</p>
+                  <p class="text-[11px] text-slate-400 line-clamp-2 leading-snug">{{ proratedPreview.variant_c?.description }}</p>
+                </div>
+                <p class="text-[10px] text-slate-500 mt-2">⏭ Keyingi: <span class="text-slate-300 font-semibold">{{ proratedPreview.variant_c?.next_billing_month }}</span></p>
+              </button>
+            </div>
+          </div>
+
+          <!-- Standard qarz summasi (agar prorated bo'lmasa) -->
+          <div v-if="(!proratedPreview || proratedPreview.is_first_day) && !proratedLoading && !payData.discount_info?.has_discount">
+            <p class="text-[10px] font-bold text-slate-500 uppercase tracking-wider mb-1">Qarz summasi</p>
+            <p class="text-xl font-black text-rose-400">{{ formatMoney(payData.amount) }}</p>
+          </div>
+
+          <!-- Chegirma info (mavjud bo'lsa) -->
           <div v-if="payData.discount_info?.has_discount" class="flex items-center gap-3 p-3 rounded-xl bg-amber-500/10 border border-amber-500/20">
             <span class="text-amber-400">🏷️</span>
             <div class="flex-1 text-xs">
-              <p class="text-amber-300 font-bold mb-0.5">Chegirma qo'llanildi</p>
+              <p class="text-amber-300 font-bold mb-0.5">Chegirma qo'llanildi: −{{ formatMoney(payData.discount) }}</p>
               <p v-if="payData.discount_info.auto_discount_amount > 0" class="text-slate-400">Avto (2+ guruh): −{{ formatMoney(payData.discount_info.auto_discount_amount) }}</p>
               <p v-if="payData.discount_info.manual_discount_amount > 0" class="text-slate-400">Qo'lda chegirma: −{{ formatMoney(payData.discount_info.manual_discount_amount) }}</p>
               <p v-if="payData.discount_info.manual_discount_reason" class="text-slate-500 italic">({{ payData.discount_info.manual_discount_reason }})</p>
             </div>
-            <div class="text-right">
-              <p class="text-xs text-slate-500 line-through">{{ formatMoney(payData.original_amount) }}</p>
-              <p class="text-sm font-black text-amber-400">{{ formatMoney(payData.amount) }}</p>
-            </div>
           </div>
-          <div v-else>
-            <p class="text-[10px] font-bold text-slate-500 uppercase tracking-wider mb-1">Qarz summasi</p>
-            <p class="text-xl font-black text-rose-400">{{ formatMoney(payData.amount) }}</p>
-          </div>
+
           <div>
             <label class="block text-[10px] font-bold text-slate-500 uppercase tracking-wider mb-2">To'lov usuli</label>
-            <div class="grid grid-cols-2 gap-3">
-              <button @click="payData.method = 'CASH'" :class="['py-2 rounded-xl text-sm font-semibold transition-colors border', payData.method === 'CASH' ? 'bg-indigo-600 border-indigo-500 text-white' : 'bg-slate-800 border-slate-700 text-slate-400 hover:bg-slate-700']">💵 Naqd</button>
-              <button @click="payData.method = 'CARD'" :class="['py-2 rounded-xl text-sm font-semibold transition-colors border', payData.method === 'CARD' ? 'bg-indigo-600 border-indigo-500 text-white' : 'bg-slate-800 border-slate-700 text-slate-400 hover:bg-slate-700']">💳 Karta (Terminal)</button>
-              <button @click="payData.method = 'CLICK'" :class="['py-2 rounded-xl text-sm font-semibold transition-colors border', payData.method === 'CLICK' ? 'bg-indigo-600 border-indigo-500 text-white' : 'bg-slate-800 border-slate-700 text-slate-400 hover:bg-slate-700']">📱 Click / Payme</button>
-              <button @click="payData.method = 'BANK'" :class="['py-2 rounded-xl text-sm font-semibold transition-colors border', payData.method === 'BANK' ? 'bg-indigo-600 border-indigo-500 text-white' : 'bg-slate-800 border-slate-700 text-slate-400 hover:bg-slate-700']">🏦 Bank o'tkazma</button>
+            <div class="grid grid-cols-2 sm:grid-cols-4 gap-2">
+              <button type="button" @click="payData.method = 'CASH'" :class="['py-2.5 rounded-xl text-xs font-semibold transition-colors border', payData.method === 'CASH' ? 'bg-indigo-600 border-indigo-500 text-white' : 'bg-slate-800 border-slate-700 text-slate-400 hover:bg-slate-700']">💵 Naqd</button>
+              <button type="button" @click="payData.method = 'CARD'" :class="['py-2.5 rounded-xl text-xs font-semibold transition-colors border', payData.method === 'CARD' ? 'bg-indigo-600 border-indigo-500 text-white' : 'bg-slate-800 border-slate-700 text-slate-400 hover:bg-slate-700']">💳 Karta</button>
+              <button type="button" @click="payData.method = 'CLICK'" :class="['py-2.5 rounded-xl text-xs font-semibold transition-colors border', payData.method === 'CLICK' ? 'bg-indigo-600 border-indigo-500 text-white' : 'bg-slate-800 border-slate-700 text-slate-400 hover:bg-slate-700']">📱 Click / Payme</button>
+              <button type="button" @click="payData.method = 'BANK'" :class="['py-2.5 rounded-xl text-xs font-semibold transition-colors border', payData.method === 'BANK' ? 'bg-indigo-600 border-indigo-500 text-white' : 'bg-slate-800 border-slate-700 text-slate-400 hover:bg-slate-700']">🏦 Bank</button>
             </div>
           </div>
+
           <!-- Jami to'lanadigan summa -->
-          <div class="p-3 rounded-xl bg-emerald-500/5 border border-emerald-500/20">
-            <p class="text-xs text-slate-400">To'lanadigan summa:</p>
-            <p class="text-xl font-black text-emerald-400">{{ formatMoney(payData.amount) }}</p>
+          <div :class="selectedVariant === 'B' ? 'border-emerald-500/20 bg-emerald-500/5' : (selectedVariant === 'C' ? 'border-sky-500/20 bg-sky-500/5' : 'border-indigo-500/20 bg-indigo-500/5')" class="p-3.5 rounded-xl border transition-all">
+            <p class="text-xs text-slate-400">
+              To'lanadigan summa <span v-if="selectedVariant" class="font-bold text-slate-300">({{ selectedVariant }}-variant)</span>:
+            </p>
+            <p class="text-2xl font-black mt-0.5" :class="selectedVariant === 'B' ? 'text-emerald-400' : (selectedVariant === 'C' ? 'text-sky-400' : 'text-indigo-400')">
+              {{ formatMoney(calculatedPayableAmount) }}
+            </p>
           </div>
+
           <div class="pt-2">
-            <button @click="submitPayment" :disabled="submittingPay" class="w-full bg-emerald-600 hover:bg-emerald-500 text-white font-bold py-3 rounded-xl transition-all shadow-lg shadow-emerald-600/20 disabled:opacity-50 flex items-center justify-center gap-2">
+            <button
+              @click="submitPayment"
+              :disabled="submittingPay || proratedLoading"
+              :class="selectedVariant === 'B' ? 'bg-emerald-600 hover:bg-emerald-500 shadow-emerald-600/20' : (selectedVariant === 'C' ? 'bg-sky-600 hover:bg-sky-500 shadow-sky-600/20' : 'bg-indigo-600 hover:bg-indigo-500 shadow-indigo-600/20')"
+              class="w-full text-white font-bold py-3.5 rounded-xl transition-all shadow-lg disabled:opacity-50 flex items-center justify-center gap-2"
+            >
               <span v-if="submittingPay" class="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin"></span>
-              {{ submittingPay ? "To'lov qabul qilinmoqda..." : "To'lovni tasdiqlash" }}
+              {{ submittingPay ? "To'lov qabul qilinmoqda..." : (selectedVariant ? `✅ ${selectedVariant}-Variant To'lovini Tasdiqlash` : "To'lovni tasdiqlash") }}
             </button>
           </div>
         </div>
@@ -313,10 +412,15 @@ const fetchDebtors = async () => {
 const showPayModal = ref(false)
 const submittingPay = ref(false)
 const payError = ref('')
+const proratedLoading = ref(false)
+const proratedPreview = ref<any>(null)
+const selectedVariant = ref<'A' | 'B' | 'C' | null>(null)
+
 const payData = ref({
   invoice_id: '',
   student_id: '',
   group_id: '',
+  groupTitle: '',
   studentName: '',
   original_amount: 0,
   amount: 0,
@@ -326,8 +430,27 @@ const payData = ref({
   month: ''
 })
 
-const openPayModal = (d: any) => {
+const calculatedPayableAmount = computed(() => {
+  const discount = payData.value.discount || 0
+  if (proratedPreview.value && !proratedPreview.value.is_first_day && selectedVariant.value) {
+    let base = 0
+    if (selectedVariant.value === 'A') {
+      base = proratedPreview.value.variant_a?.amount || 0
+    } else if (selectedVariant.value === 'B') {
+      base = proratedPreview.value.variant_b?.amount || 0
+    } else if (selectedVariant.value === 'C') {
+      base = proratedPreview.value.variant_c?.amount || 0
+    }
+    return Math.max(0, base - discount)
+  }
+  return payData.value.amount || 0
+})
+
+const openPayModal = async (d: any) => {
   payError.value = ''
+  proratedPreview.value = null
+  selectedVariant.value = null
+  proratedLoading.value = true
   const discountInfo = d.discount_info || null
   const originalAmount = d.amount || 0
   const finalAmount = d.final_amount || d.amount || 0
@@ -335,6 +458,7 @@ const openPayModal = (d: any) => {
     invoice_id: d._id,
     student_id: d.student?._id,
     group_id: d.group?._id,
+    groupTitle: d.group?.title || '',
     studentName: `${d.student?.user?.firstname} ${d.student?.user?.lastname}`,
     original_amount: originalAmount,
     amount: finalAmount,
@@ -344,6 +468,22 @@ const openPayModal = (d: any) => {
     month: d.month
   }
   showPayModal.value = true
+
+  try {
+    const token = useCookie('auth_token')
+    const res = await $fetch<any>(
+      `/api/v1/finance/prorated-preview?student_id=${d.student?._id}&group_id=${d.group?._id}`,
+      { headers: { Authorization: `Bearer ${token.value}` } }
+    )
+    proratedPreview.value = res.data
+    if (res.data && !res.data.is_first_day) {
+      selectedVariant.value = 'A'
+    }
+  } catch (err) {
+    proratedPreview.value = null
+  } finally {
+    proratedLoading.value = false
+  }
 }
 
 const closePayModal = () => {
@@ -356,26 +496,46 @@ const submitPayment = async () => {
   payError.value = ''
   try {
     const token = useCookie('auth_token')
-    await $fetch('/api/v1/finance/invoices', {
-      method: 'POST',
-      headers: { Authorization: `Bearer ${token.value}` },
-      body: {
-        student_id: payData.value.student_id,
-        group_id: payData.value.group_id,
-        amount: payData.value.original_amount || payData.value.amount,
-        discount: payData.value.discount || 0,
-        payment_method: payData.value.method,
-        month: payData.value.month
-      }
-    })
+
+    if (proratedPreview.value && !proratedPreview.value.is_first_day && selectedVariant.value) {
+      let rawAmount = 0
+      if (selectedVariant.value === 'A') rawAmount = proratedPreview.value.variant_a?.amount
+      else if (selectedVariant.value === 'B') rawAmount = proratedPreview.value.variant_b?.amount
+      else if (selectedVariant.value === 'C') rawAmount = proratedPreview.value.variant_c?.amount
+
+      await $fetch('/api/v1/finance/invoices/sync-billing', {
+        method: 'POST',
+        headers: { Authorization: `Bearer ${token.value}` },
+        body: {
+          student_id: payData.value.student_id,
+          group_id: payData.value.group_id,
+          variant: selectedVariant.value,
+          payment_method: payData.value.method,
+          amount: rawAmount,
+          discount: payData.value.discount || 0,
+          note: `Qarzdorlikdan to'landi (${selectedVariant.value}-variant)`
+        }
+      })
+    } else {
+      await $fetch('/api/v1/finance/invoices', {
+        method: 'POST',
+        headers: { Authorization: `Bearer ${token.value}` },
+        body: {
+          student_id: payData.value.student_id,
+          group_id: payData.value.group_id,
+          amount: payData.value.original_amount || payData.value.amount,
+          discount: payData.value.discount || 0,
+          payment_method: payData.value.method,
+          month: payData.value.month
+        }
+      })
+    }
     
     // Success: ro'yxatdan o'chirish
-    // Virtual invoicelarda _id = null bo'ladi, shuning uchun student+group bo'yicha filter
     debtors.value = debtors.value.filter((d: any) => {
       if (d._id && payData.value.invoice_id) {
         return d._id !== payData.value.invoice_id
       }
-      // Virtual: student_id va group_id bo'yicha
       return !(
         d.student?._id === payData.value.student_id &&
         d.group?._id === payData.value.group_id &&
