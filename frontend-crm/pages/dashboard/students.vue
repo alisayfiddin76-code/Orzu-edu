@@ -476,7 +476,7 @@
                 </div>
               </div>
 
-              <div class="grid grid-cols-2 gap-3">
+              <div class="grid grid-cols-1 sm:grid-cols-3 gap-3">
                 <button @click="billingSyncVariant = 'A'" :class="['p-4 rounded-xl border-2 text-left transition-all w-full', billingSyncVariant === 'A' ? 'border-indigo-500 bg-indigo-600/15' : 'border-slate-700 bg-slate-900/50 hover:border-slate-600']">
                   <div class="flex items-center justify-between mb-2">
                     <span class="text-xs font-bold text-indigo-400 uppercase tracking-wider">A-Variant</span>
@@ -504,6 +504,18 @@
                     <p class="text-[10px] text-slate-500">⏭ Keyingi: <span class="text-slate-300 font-semibold">{{ billingSyncPreview.variant_b?.next_billing_month }}</span></p>
                   </div>
                 </button>
+
+                <button @click="billingSyncVariant = 'C'" :class="['p-4 rounded-xl border-2 text-left transition-all w-full', billingSyncVariant === 'C' ? 'border-sky-500 bg-sky-600/15' : 'border-slate-700 bg-slate-900/50 hover:border-slate-600']">
+                  <div class="flex items-center justify-between mb-2">
+                    <span class="text-xs font-bold text-sky-400 uppercase tracking-wider">C-Variant</span>
+                    <div :class="['w-4 h-4 rounded-full border-2 flex items-center justify-center', billingSyncVariant === 'C' ? 'border-sky-400' : 'border-slate-600']">
+                      <div v-if="billingSyncVariant === 'C'" class="w-2 h-2 rounded-full bg-sky-400"></div>
+                    </div>
+                  </div>
+                  <p class="text-lg font-black text-white mb-1">{{ formatBillingMoney(billingSyncPreview.variant_c?.amount) }}</p>
+                  <p class="text-xs text-slate-400">{{ billingSyncPreview.variant_c?.description }}</p>
+                  <p class="text-[10px] text-slate-500 mt-2">⏭ Keyingi: <span class="text-slate-300 font-semibold">{{ billingSyncPreview.variant_c?.next_billing_month }}</span></p>
+                </button>
               </div>
 
               <div v-if="billingSyncVariant">
@@ -526,7 +538,7 @@
                 <button
                   @click="submitBillingSync"
                   :disabled="!billingSyncVariant || !billingSyncMethod || billingSyncSubmitting"
-                  :class="billingSyncVariant === 'B' ? 'bg-emerald-600 hover:bg-emerald-500' : 'bg-indigo-600 hover:bg-indigo-500'"
+                  :class="billingSyncVariant === 'B' ? 'bg-emerald-600 hover:bg-emerald-500' : (billingSyncVariant === 'C' ? 'bg-sky-600 hover:bg-sky-500' : 'bg-indigo-600 hover:bg-indigo-500')"
                   class="px-5 py-2.5 rounded-lg text-white text-xs font-bold disabled:opacity-50 transition-colors"
                 >
                   {{ billingSyncSubmitting ? 'Saqlanmoqda...' : (billingSyncVariant ? `✅ ${billingSyncVariant}-Variant Tasdiqlash` : 'Variant tanlang') }}
@@ -919,7 +931,7 @@ const billingSyncStudent = ref<any>(null)
 const billingSyncGroup = ref<any>(null)
 const billingSyncPreview = ref<any>(null)
 const billingSyncLoading = ref(false)
-const billingSyncVariant = ref<'A' | 'B' | null>(null)
+const billingSyncVariant = ref<'A' | 'B' | 'C' | null>(null)
 const billingSyncMethod = ref('')
 const billingSyncNote = ref('')
 const billingSyncSubmitting = ref(false)
@@ -975,7 +987,7 @@ const submitBillingSync = async () => {
     const preview = billingSyncPreview.value
     const amount = billingSyncVariant.value === 'A'
       ? preview?.variant_a?.amount
-      : preview?.variant_b?.amount
+      : (billingSyncVariant.value === 'C' ? preview?.variant_c?.amount : preview?.variant_b?.amount)
 
     await $fetch('/api/v1/finance/invoices/sync-billing', {
       method: 'POST',
@@ -992,7 +1004,9 @@ const submitBillingSync = async () => {
 
     const msg = billingSyncVariant.value === 'A'
       ? "A-Variant: Joriy oy qoldig'i to'landi. Keyingi oyda invoice yaratiladi."
-      : "B-Variant: Joriy oy + keyingi oy to'landi. Keyingi oyda invoice yaratilmaydi."
+      : (billingSyncVariant.value === 'C'
+        ? "C-Variant: 1 oylik to'liq to'lov qabul qilindi. Keyingi oyda invoice yaratiladi."
+        : "B-Variant: Joriy oy + keyingi oy to'landi. Keyingi oyda invoice yaratilmaydi.")
     billingSyncSuccess.value = `✅ ${msg}`
     setTimeout(() => {
       showBillingSyncModal.value = false

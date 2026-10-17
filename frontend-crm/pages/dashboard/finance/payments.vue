@@ -101,7 +101,7 @@
             </div>
           </div>
 
-          <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+          <div class="grid grid-cols-1 sm:grid-cols-3 gap-3">
             <button
               @click="payForms[item.group._id].selectedVariant = 'A'"
               :class="['p-4 rounded-xl border-2 text-left transition-all w-full', payForms[item.group._id].selectedVariant === 'A' ? 'border-indigo-500 bg-indigo-600/15' : 'border-slate-700 bg-slate-900/50 hover:border-slate-600']"
@@ -135,6 +135,21 @@
                 <p class="text-[10px] text-slate-500">⏭ Keyingi to''lov: <span class="text-slate-300 font-semibold">{{ proratedData[item.group._id].variant_b?.next_billing_month }}</span></p>
               </div>
             </button>
+
+            <button
+              @click="payForms[item.group._id].selectedVariant = 'C'"
+              :class="['p-4 rounded-xl border-2 text-left transition-all w-full', payForms[item.group._id].selectedVariant === 'C' ? 'border-sky-500 bg-sky-600/15' : 'border-slate-700 bg-slate-900/50 hover:border-slate-600']"
+            >
+              <div class="flex items-center justify-between mb-2">
+                <span class="text-xs font-bold text-sky-400 uppercase tracking-wider">C-Variant</span>
+                <div :class="['w-4 h-4 rounded-full border-2 flex items-center justify-center', payForms[item.group._id].selectedVariant === 'C' ? 'border-sky-400' : 'border-slate-600']">
+                  <div v-if="payForms[item.group._id].selectedVariant === 'C'" class="w-2 h-2 rounded-full bg-sky-400"></div>
+                </div>
+              </div>
+              <p class="text-xl font-black text-white mb-1">{{ formatMoney(proratedData[item.group._id].variant_c?.amount) }}</p>
+              <p class="text-xs text-slate-400">{{ proratedData[item.group._id].variant_c?.description }}</p>
+              <p class="text-[10px] text-slate-500 mt-2">⏭ Keyingi to''lov: <span class="text-slate-300 font-semibold">{{ proratedData[item.group._id].variant_c?.next_billing_month }}</span></p>
+            </button>
           </div>
 
           <div v-if="payForms[item.group._id].selectedVariant" class="space-y-3 border-t border-slate-700/50 pt-3">
@@ -153,16 +168,16 @@
               <label class="text-xs text-slate-500 font-semibold uppercase tracking-wider block mb-1.5">Izoh</label>
               <input v-model="payForms[item.group._id].note" type="text" placeholder="Ixtiyoriy..." class="w-full bg-slate-900 border border-slate-700 rounded-xl px-3 py-2.5 text-sm text-white focus:outline-none focus:border-indigo-500" />
             </div>
-            <div :class="payForms[item.group._id].selectedVariant === 'B' ? 'border-emerald-500/20 bg-emerald-500/5' : 'border-indigo-500/20 bg-indigo-500/5'" class="p-3 rounded-xl border">
+            <div :class="payForms[item.group._id].selectedVariant === 'B' ? 'border-emerald-500/20 bg-emerald-500/5' : (payForms[item.group._id].selectedVariant === 'C' ? 'border-sky-500/20 bg-sky-500/5' : 'border-indigo-500/20 bg-indigo-500/5')" class="p-3 rounded-xl border">
               <p class="text-xs text-slate-400">To''lanadigan summa ({{ payForms[item.group._id].selectedVariant }}-variant):</p>
-              <p class="text-xl font-black mt-1" :class="payForms[item.group._id].selectedVariant === 'B' ? 'text-emerald-400' : 'text-indigo-400'">
-                {{ payForms[item.group._id].selectedVariant === 'A' ? formatMoney(proratedData[item.group._id]?.variant_a?.amount) : formatMoney(proratedData[item.group._id]?.variant_b?.amount) }}
+              <p class="text-xl font-black mt-1" :class="payForms[item.group._id].selectedVariant === 'B' ? 'text-emerald-400' : (payForms[item.group._id].selectedVariant === 'C' ? 'text-sky-400' : 'text-indigo-400')">
+                {{ payForms[item.group._id].selectedVariant === 'A' ? formatMoney(proratedData[item.group._id]?.variant_a?.amount) : (payForms[item.group._id].selectedVariant === 'C' ? formatMoney(proratedData[item.group._id]?.variant_c?.amount) : formatMoney(proratedData[item.group._id]?.variant_b?.amount)) }}
               </p>
             </div>
             <button
               @click="submitProratedPayment(item)"
               :disabled="!payForms[item.group._id].method || payingGroupId === item.group._id"
-              :class="payForms[item.group._id].selectedVariant === 'B' ? 'bg-emerald-600 hover:bg-emerald-500' : 'bg-indigo-600 hover:bg-indigo-500'"
+              :class="payForms[item.group._id].selectedVariant === 'B' ? 'bg-emerald-600 hover:bg-emerald-500' : (payForms[item.group._id].selectedVariant === 'C' ? 'bg-sky-600 hover:bg-sky-500' : 'bg-indigo-600 hover:bg-indigo-500')"
               class="w-full py-3 rounded-xl text-white font-bold text-sm disabled:opacity-50 transition-colors"
             >
               {{ payingGroupId === item.group._id ? 'Saqlanmoqda...' : `✅ ${payForms[item.group._id].selectedVariant}-Variant To'lovini Qabul Qilish` }}
@@ -392,7 +407,9 @@ const submitProratedPayment = async (item: any) => {
   payError.value = ''
   paySuccess.value = ''
   const preview = proratedData[item.group._id]
-  const amount = form.selectedVariant === 'A' ? preview?.variant_a?.amount : preview?.variant_b?.amount
+  const amount = form.selectedVariant === 'A'
+    ? preview?.variant_a?.amount
+    : (form.selectedVariant === 'C' ? preview?.variant_c?.amount : preview?.variant_b?.amount)
   try {
     const token = useCookie('auth_token')
     await $fetch('/api/v1/finance/invoices/sync-billing', {
@@ -400,7 +417,11 @@ const submitProratedPayment = async (item: any) => {
       headers: { Authorization: `Bearer ${token.value}` },
       body: { student_id: studentData.value.student._id, group_id: item.group._id, variant: form.selectedVariant, payment_method: form.method, amount, discount: form.discount || 0, note: form.note || null }
     })
-    const msg = form.selectedVariant === 'A' ? "A-Variant: Joriy oy qoldig'i to'landi. Keyingi oyda invoice yaratiladi." : "B-Variant: Joriy oy + keyingi oy to'landi. Keyingi oyda invoice yaratilmaydi."
+    const msg = form.selectedVariant === 'A'
+      ? "A-Variant: Joriy oy qoldig'i to'landi. Keyingi oyda invoice yaratiladi."
+      : (form.selectedVariant === 'C'
+        ? "C-Variant: 1 oylik to'liq to'lov qabul qilindi. Keyingi oyda invoice yaratiladi."
+        : "B-Variant: Joriy oy + keyingi oy to'landi. Keyingi oyda invoice yaratilmaydi.")
     paySuccess.value = `✅ ${item.group.title}: ${msg}`
     await searchStudent()
     setTimeout(() => { paySuccess.value = '' }, 6000)

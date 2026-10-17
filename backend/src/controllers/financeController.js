@@ -1621,6 +1621,13 @@ exports.calculateProratedPreview = async (req, res, next) => {
       skip_until: bVariantSkipUntil,
     };
 
+    const variantC = {
+      label: 'C-Variant: 1 oylik to\'liq to\'lov',
+      amount: fullPrice,
+      description: `Joriy oy (${currentMonthStr}) uchun to'liq to'lov`,
+      next_billing_month: nextMonthStr,
+    };
+
     // Agar student_id berilgan bo'lsa — u allaqachon B-variant tanlaganmi tekshiramiz
     let existingOverride = null;
     if (student_id) {
@@ -1646,6 +1653,7 @@ exports.calculateProratedPreview = async (req, res, next) => {
         full_price: fullPrice,
         variant_a: variantA,
         variant_b: variantB,
+        variant_c: variantC,
         existing_override: existingOverride,
       },
     });
@@ -1677,10 +1685,10 @@ exports.syncStudentBillingCycle = async (req, res, next) => {
     const { student_id, group_id, variant, payment_method, amount, discount, note } = req.body;
 
     if (!student_id || !group_id || !variant || !payment_method) {
-      return next(new AppError('student_id, group_id, variant (A|B) va payment_method majburiy', 400));
+      return next(new AppError('student_id, group_id, variant (A|B|C) va payment_method majburiy', 400));
     }
-    if (!['A', 'B'].includes(variant)) {
-      return next(new AppError('variant faqat A yoki B bo\'lishi mumkin', 400));
+    if (!['A', 'B', 'C'].includes(variant)) {
+      return next(new AppError('variant faqat A, B yoki C bo\'lishi mumkin', 400));
     }
 
     const student = await Student.findById(student_id);
@@ -1745,6 +1753,48 @@ exports.syncStudentBillingCycle = async (req, res, next) => {
       createdInvoices.push(invoice);
 
       // A-variant: billing_overrides dan shu guruh override ni o'chirib tashlaymiz (normal tsiklga qaytadi)
+      await Student.updateOne(
+        { _id: student_id },
+        { $pull: { billing_overrides: { group: group._id } } }
+      );
+
+    } else if (variant === 'C') {
+      // === C-VARIANT: 1 oylik to'liq to'lov ===
+      const finalAmt = amount || fullPrice;
+      const finalPayable = finalAmt - disc;
+
+      let invoice = await Invoice.findOne({ student: student_id, group: group_id, month: currentMonthStr });
+      if (invoice) {
+        invoice.amount = finalAmt;
+        invoice.discount = disc;
+        invoice.final_amount = finalPayable;
+        invoice.status = 'PAID';
+        invoice.paid_at = paidAt;
+        invoice.payment_method = payment_method;
+        invoice.invoice_type = 'FULL';
+        invoice.note = note || `C-variant: 1 oylik to'liq to'lov (${currentMonthStr})`;
+        invoice.created_by = req.user._id;
+        await invoice.save();
+      } else {
+        invoice = await Invoice.create({
+          student: student_id,
+          group: group_id,
+          month: currentMonthStr,
+          amount: finalAmt,
+          discount: disc,
+          final_amount: finalPayable,
+          status: 'PAID',
+          due_date: dueDate,
+          paid_at: paidAt,
+          payment_method,
+          invoice_type: 'FULL',
+          note: note || `C-variant: 1 oylik to'liq to'lov (${currentMonthStr})`,
+          created_by: req.user._id,
+        });
+      }
+      createdInvoices.push(invoice);
+
+      // C-variant: billing_overrides dan shu guruh override ni o'chirib tashlaymiz (normal tsiklga qaytadi, keyingi oy 1-sanasida invoice yaratiladi)
       await Student.updateOne(
         { _id: student_id },
         { $pull: { billing_overrides: { group: group._id } } }
@@ -1856,9 +1906,9 @@ exports.syncStudentBillingCycle = async (req, res, next) => {
         variant,
         invoices: createdInvoices,
         total_paid: totalPaid,
-        next_billing_info: variant === 'A'
-          ? 'Keyingi oyning 1-sanasida avtomatik invoice yaratiladi'
-          : 'Keyingi oyning 1-sanasida invoice yaratilmaydi (to\'lov allaqachon amalga oshirildi)',
+        next_billing_info: variant === 'B'
+          ? 'Keyingi oyning 1-sanasida invoice yaratilmaydi (to\'lov allaqachon amalga oshirildi)'
+          : 'Keyingi oyning 1-sanasida avtomatik invoice yaratiladi',
       },
     });
   } catch (error) {
