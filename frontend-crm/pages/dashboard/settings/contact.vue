@@ -303,33 +303,55 @@ const editing = ref(false)
 const successMsg = ref('')
 const errorMsg = ref('')
 
-const settings = ref<any>({
-  phone_1: '', phone_2: '', email: '',
-  main_address: '', branch_address: '', branches: [],
-  instagram: '', telegram: '', youtube: '',
+const defaultSettings = {
+  phone_1: '+998 94 460 96 96',
+  phone_2: '',
+  email: 'info@orzuedu.uz',
+  main_address: "Namangan viloyati, Yangiqo'rg'on tumani",
+  branch_address: '',
+  branches: [],
+  instagram: 'https://instagram.com/orzuedu',
+  telegram: 'https://t.me/orzuedu',
+  youtube: '',
   weekdays_label: 'Dushanba - Shanba',
   weekdays_hours: '09:00 - 20:00',
   weekend_label: 'Yakshanba',
   weekend_hours: 'Dam olish kuni',
-})
+}
+
+const settings = ref<any>({ ...defaultSettings })
 
 const form = ref<any>({ branches: [] })
 
 const fetchSettings = async () => {
   loading.value = true
+  errorMsg.value = ''
   try {
     const res: any = await $fetch(`${API}/api/v1/settings/contact`)
-    settings.value = res.data.settings
+    if (res?.data?.settings) {
+      settings.value = {
+        ...defaultSettings,
+        ...res.data.settings,
+        branches: Array.isArray(res.data.settings.branches) ? res.data.settings.branches : []
+      }
+    } else {
+      settings.value = { ...defaultSettings }
+    }
   } catch (err: any) {
-    errorMsg.value = "Ma'lumotlarni yuklashda xatolik"
+    settings.value = { ...defaultSettings }
+    if (err?.status && err.status !== 404) {
+      errorMsg.value = err?.data?.message || "Ma'lumotlarni yuklashda xatolik yuz berdi"
+    }
   } finally {
     loading.value = false
   }
 }
 
 const startEdit = () => {
-  form.value = JSON.parse(JSON.stringify(settings.value))
-  if (!form.value.branches) form.value.branches = []
+  form.value = JSON.parse(JSON.stringify(settings.value || defaultSettings))
+  if (!form.value.branches || !Array.isArray(form.value.branches)) {
+    form.value.branches = []
+  }
   
   // Migrate old branch_address to branches array if it exists and branches is empty
   if (form.value.branch_address && form.value.branches.length === 0) {
@@ -360,7 +382,13 @@ const saveSettings = async () => {
       headers: { Authorization: `Bearer ${token.value}` },
       body: form.value
     })
-    settings.value = res.data.settings
+    if (res?.data?.settings) {
+      settings.value = {
+        ...defaultSettings,
+        ...res.data.settings,
+        branches: Array.isArray(res.data.settings.branches) ? res.data.settings.branches : []
+      }
+    }
     editing.value = false
     successMsg.value = "Aloqa ma'lumotlari muvaffaqiyatli saqlandi!"
     setTimeout(() => { successMsg.value = '' }, 4000)

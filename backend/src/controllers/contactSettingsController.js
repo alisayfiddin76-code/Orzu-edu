@@ -1,20 +1,37 @@
 const ContactSettings = require('../models/ContactSettings');
 const AppError = require('../utils/appError');
 
+const defaultSettingsData = {
+  phone_1: '+998 94 460 96 96',
+  phone_2: null,
+  email: 'info@orzuedu.uz',
+  main_address: "Namangan viloyati, Yangiqo'rg'on tumani",
+  branch_address: null,
+  branches: [],
+  instagram: 'https://instagram.com/orzuedu',
+  telegram: 'https://t.me/orzuedu',
+  youtube: null,
+  weekdays_label: 'Dushanba - Shanba',
+  weekdays_hours: '09:00 - 20:00',
+  weekend_label: 'Yakshanba',
+  weekend_hours: 'Dam olish kuni',
+};
+
 /**
  * GET /api/v1/settings/contact
  * Public — hamma o'qiy oladi
  */
 exports.getContactSettings = async (req, res, next) => {
   try {
-    const settings = await ContactSettings.findOne();
+    let settings = await ContactSettings.findOne();
 
-    // Agar bazada hech nima bo'lmasa, null qaytaramiz
+    // Agar bazada hech nima bo'lmasa, standart ma'lumotlar bilan yaratamiz yoki qaytaramiz
     if (!settings) {
-      return res.status(200).json({
-        status: 'success',
-        data: null
-      });
+      try {
+        settings = await ContactSettings.create(defaultSettingsData);
+      } catch (createErr) {
+        settings = defaultSettingsData;
+      }
     }
 
     return res.status(200).json({
