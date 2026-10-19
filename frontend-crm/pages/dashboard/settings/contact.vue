@@ -188,7 +188,7 @@
               <div v-for="(branch, idx) in settings.branches" :key="idx" class="flex items-start gap-3 p-4 rounded-xl bg-slate-800/50 border border-slate-700">
                 <Icon name="lucide:map-pin" class="w-4 h-4 text-amber-400 shrink-0 mt-1" />
                 <div>
-                  <p class="text-[10px] font-bold text-slate-400 uppercase tracking-wider">Filial {{ idx + 1 }}</p>
+                  <p class="text-[10px] font-bold text-slate-400 uppercase tracking-wider">Filial {{ Number(idx) + 1 }}</p>
                   <p class="text-white font-semibold mt-0.5 text-sm leading-relaxed">{{ branch }}</p>
                 </div>
               </div>
@@ -214,7 +214,7 @@
               
               <div class="space-y-3">
                 <div v-for="(branch, idx) in form.branches" :key="idx" class="flex gap-2 items-start">
-                  <textarea v-model="form.branches[idx]" rows="2" :placeholder="`Filial ${idx + 1} manzili...`"
+                  <textarea v-model="form.branches[idx]" rows="2" :placeholder="`Filial ${Number(idx) + 1} manzili...`"
                     class="w-full bg-slate-800 border border-slate-700 rounded-xl px-4 py-3 text-white text-sm focus:outline-none focus:ring-2 focus:ring-[#F2C230]/40 focus:border-[#F2C230]/50 transition resize-none"></textarea>
                   <button type="button" @click="form.branches.splice(idx, 1)" class="p-3 text-rose-400 hover:bg-rose-500/10 rounded-xl transition-colors border border-transparent hover:border-rose-500/30" title="O'chirish">
                     <Icon name="lucide:trash-2" class="w-5 h-5" />
@@ -303,7 +303,24 @@ const editing = ref(false)
 const successMsg = ref('')
 const errorMsg = ref('')
 
-const defaultSettings = {
+interface ContactSettingsData {
+  _id?: string
+  phone_1: string
+  phone_2?: string | null
+  email?: string | null
+  main_address: string
+  branch_address?: string | null
+  branches: string[]
+  instagram?: string | null
+  telegram?: string | null
+  youtube?: string | null
+  weekdays_label: string
+  weekdays_hours: string
+  weekend_label: string
+  weekend_hours: string
+}
+
+const defaultSettings: ContactSettingsData = {
   phone_1: '+998 94 460 96 96',
   phone_2: '',
   email: 'info@orzuedu.uz',
@@ -319,9 +336,9 @@ const defaultSettings = {
   weekend_hours: 'Dam olish kuni',
 }
 
-const settings = ref<any>({ ...defaultSettings })
+const settings = ref<ContactSettingsData>({ ...defaultSettings })
 
-const form = ref<any>({ branches: [] })
+const form = ref<ContactSettingsData>({ ...defaultSettings })
 
 const fetchSettings = async () => {
   loading.value = true
