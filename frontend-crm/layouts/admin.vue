@@ -123,6 +123,7 @@ const notificationCount = ref(0)
 const authToken = useCookie('auth_token')
 
 const fetchNotifications = async () => {
+  if (!authToken.value) return
   try {
     const res = await fetch('/api/v1/finance/invoices/notifications', {
       headers: {
@@ -131,11 +132,11 @@ const fetchNotifications = async () => {
     })
     if (!res.ok) return
     const data = await res.json()
-    if (data.status === 'success') {
-      notificationCount.value = data.data.count
+    if (data?.status === 'success' && data?.data) {
+      notificationCount.value = data.data.count || 0
     }
   } catch (error) {
-    console.error('Bildirishnomalarni olishda xatolik:', error)
+    // Tarmoq yoki 429 xatosi bo'lsa konsolga shovqin qilmaymiz
   }
 }
 

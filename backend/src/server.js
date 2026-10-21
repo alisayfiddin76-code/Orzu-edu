@@ -52,16 +52,18 @@ app.use(cors({
 
 // ---- Rate Limiting ----
 // MUHIM: Backend Cloudflare (Render) va Vercel proxy ortida ishlaydi.
-// req.ip barcha foydalanuvchilar uchun bir xil proxy IP bo'lib qoladi,
-// natijada hamma bitta umumiy limitga tushib, 429 xatosi chiqardi.
-// Shuning uchun kalit: tizimga kirganlar uchun user ID, qolganlar uchun haqiqiy mijoz IP.
+// Kalit: tizimga kirgan foydalanuvchilar uchun User ID (mustaqil 3000 so'rov/daq),
+// qolganlar uchun mijozning haqiqiy IP manzili (600 so'rov/daq).
 const { ipKeyGenerator } = require('express-rate-limit');
 const jwt = require('jsonwebtoken');
 
 const getClientIp = (req) => {
   const xff = req.headers['x-forwarded-for'];
-  const firstForwarded = xff ? String(xff).split(',')[0].trim() : '';
-  return firstForwarded || req.headers['cf-connecting-ip'] || req.ip || 'unknown';
+  if (xff) {
+    const list = String(xff).split(',').map((s) => s.trim()).filter(Boolean);
+    if (list.length > 0) return list[0];
+  }
+  return req.headers['cf-connecting-ip'] || req.ip || 'unknown';
 };
 
 const ipKey = (req) => {
@@ -73,33 +75,50 @@ const ipKey = (req) => {
   }
 };
 
-const userOrIpKey = (req) => {
+const extractUserIdFromAuth = (req) => {
   const auth = req.headers.authorization;
   if (auth && auth.startsWith('Bearer ')) {
-    try {
-      const decoded = jwt.verify(auth.slice(7), process.env.JWT_SECRET);
-      if (decoded && decoded.id) return `user:${decoded.id}`;
-    } catch {
-      // Yaroqsiz token — IP bo'yicha hisoblanadi
+    const rawToken = auth.slice(7).trim();
+    if (rawToken && rawToken !== 'undefined' && rawToken !== 'null') {
+      try {
+        const decoded = jwt.decode(rawToken);
+        if (decoded && (decoded.id || decoded._id)) {
+          return String(decoded.id || decoded._id);
+        }
+      } catch {
+        // ...
+      }
     }
   }
+  return null;
+};
+
+const userOrIpKey = (req) => {
+  const userId = extractUserIdFromAuth(req);
+  if (userId) return `user:${userId}`;
   return ipKey(req);
 };
 
-// Umumiy API rate limit: har bir foydalanuvchi/IP uchun 1 daqiqada 300 ta so'rov
+// Umumiy API rate limit:
+// - Kirgan CRM / Dashboard xodimlari uchun: 1 daqiqada 3000 ta so'rov
+// - Anonim / umumiy IP uchun: 1 daqiqada 600 ta so'rov
 const generalLimiter = rateLimit({
   windowMs: 60 * 1000,      // 1 daqiqa
-  max: 300,
+  max: (req) => {
+    const userId = extractUserIdFromAuth(req);
+    return userId ? 3000 : 600;
+  },
   keyGenerator: userOrIpKey,
-  message: { status: 'error', message: "Juda ko'p so'rov. Iltimos, bir daqiqa kuting." },
+  skip: (req) => req.method === 'OPTIONS',
+  message: { status: 'error', message: "Juda ko'p so'rov. Iltimos, bir oz kuting." },
   standardHeaders: true,
   legacyHeaders: false,
 });
 
-// Login uchun cheklov: har bir IP uchun 15 daqiqada 20 ta muvaffaqiyatsiz urinish
+// Login uchun cheklov: har bir IP uchun 15 daqiqada 30 ta muvaffaqiyatsiz urinish
 const loginLimiter = rateLimit({
   windowMs: 15 * 60 * 1000, // 15 daqiqa
-  max: 20,
+  max: 30,
   keyGenerator: ipKey,
   skipSuccessfulRequests: true, // Muvaffaqiyatli kirishlar hisobga olinmaydi
   message: { status: 'error', message: "Juda ko'p urinish. 15 daqiqadan keyin qayta urining." },
@@ -189,7 +208,7 @@ app.use('/api/v1/settings/contact', contactSettingsRoutes);
 
 // Version check endpoint — qaysi kod versiyasi ishlab turganini ko'rish uchun
 app.get('/api/version', (req, res) => {
-  res.json({ version: '7c6f646', time: new Date().toISOString(), node: process.version });
+  res.json({ version: 'ratelimit-v2', time: new Date().toISOString(), node: process.version });
 });
 
 // Base Route for Health Check
