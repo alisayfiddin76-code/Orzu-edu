@@ -83,9 +83,38 @@
               <span class="text-brand-accent">🎓</span>
               {{ teacher.education }}
             </div>
-            <p class="text-sm text-slate-600 font-medium leading-relaxed line-clamp-3 mb-6 flex-grow">
-              {{ teacher.bio }}
-            </p>
+            <!-- Bio with Show More toggle -->
+            <div class="mb-6 flex-grow flex flex-col">
+              <p 
+                :class="[
+                  'text-sm text-slate-600 font-medium leading-relaxed transition-all duration-300',
+                  expandedTeachers[teacher._id] ? '' : 'line-clamp-3'
+                ]"
+              >
+                {{ teacher.bio || "ORZU EDU malakali va tajribali o'qituvchisi." }}
+              </p>
+              <button 
+                v-if="teacher.bio && teacher.bio.length > 80"
+                type="button"
+                @click="toggleBio(teacher._id)"
+                class="mt-2.5 text-xs font-bold text-brand-primary hover:text-brand-accent transition-colors self-start inline-flex items-center gap-1.5 py-1 px-2.5 rounded-lg bg-slate-50 hover:bg-brand-accent/15 border border-brand-border/70 hover:border-brand-accent/40 cursor-pointer focus:outline-none"
+              >
+                <span>{{ expandedTeachers[teacher._id] ? 'Kamroq ko\'rish' : 'Batafsil o\'qish (Show more)' }}</span>
+                <svg 
+                  xmlns="http://www.w3.org/2000/svg" 
+                  class="w-3.5 h-3.5 transition-transform duration-300"
+                  :class="expandedTeachers[teacher._id] ? 'rotate-180 text-brand-accent' : 'text-brand-primary'"
+                  viewBox="0 0 24 24" 
+                  fill="none" 
+                  stroke="currentColor" 
+                  stroke-width="2.5" 
+                  stroke-linecap="round" 
+                  stroke-linejoin="round"
+                >
+                  <polyline points="6 9 12 15 18 9"></polyline>
+                </svg>
+              </button>
+            </div>
 
             <div class="flex justify-between items-center pt-4 border-t border-brand-border/60 mb-6">
               <div v-if="teacher.experience" class="flex flex-col">
@@ -154,6 +183,13 @@ useHead({
 })
 
 const activeCategory = ref('Barchasi')
+
+// O'qituvchi ma'lumotini to'liq ko'rish (Show more / Show less) holati
+const expandedTeachers = ref<Record<string, boolean>>({})
+
+const toggleBio = (id: string) => {
+  expandedTeachers.value[id] = !expandedTeachers.value[id]
+}
 
 // Backenddan ma'lumotlarni olish
 const { data: teachersData, pending, error } = await useFetch<any>("/api/v1/teachers/public", {
